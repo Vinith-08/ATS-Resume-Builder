@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block title %}Upload Resume{% endblock %}
+{% block page_title %}Upload & Parse Resume{% endblock %}
+
+{% block content %}
+<div class="upload-layout">
+    <div class="form-card" style="max-width: 640px; margin: 0 auto;">
+        <div class="form-card-header">
+            <div class="form-card-icon">📤</div>
+            <div>
+                <h2 class="form-card-title">Upload Your Resume</h2>
+                <p class="form-card-sub">Extract text from PDF or DOCX files</p>
+            </div>
+        </div>
+
+        <form method="POST" enctype="multipart/form-data">
+            <div class="upload-dropzone" id="dropzone" onclick="document.getElementById('resume_file').click()">
+                <div class="dropzone-icon">📄</div>
+                <div class="dropzone-text">Click to upload or drag &amp; drop</div>
+                <div class="dropzone-sub">PDF or DOCX — max 10 MB</div>
+                <input type="file" id="resume_file" name="resume_file" accept=".pdf,.docx" style="display:none" onchange="showFilename(this)">
+                <div class="dropzone-filename" id="dropzoneFilename"></div>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-full" style="margin-top: 16px;">
+                Extract Text from File
+            </button>
+        </form>
+
+        {% if extracted_text %}
+        <div class="upload-result">
+            <h3 style="color: var(--green); margin-bottom: 12px;">✅ Text Extracted Successfully</h3>
+            <div class="upload-text-box">{{ extracted_text }}</div>
+            <p style="color: var(--text-muted); font-size: 13px; margin-top: 12px;">
+                Copy this text and paste it into the ATS Analyzer or use it to fill the Resume Builder.
+            </p>
+            <div style="display:flex; gap:12px; margin-top: 12px;">
+                <a href="{{ url_for('ats_analyzer') }}" class="btn btn-primary btn-sm">Use in ATS Analyzer</a>
+                <a href="{{ url_for('resume_builder') }}" class="btn btn-outline btn-sm">Fill Resume Builder</a>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="upload-note">
+            <strong>Note:</strong> Upload requires <code>PyMuPDF</code> (PDF) or <code>python-docx</code> (DOCX) to be installed. If extraction fails, copy the text manually and paste it into the ATS Analyzer.
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function showFilename(input) {
+    const el = document.getElementById('dropzoneFilename');
+    if (input.files.length > 0) {
+        el.textContent = '📎 ' + input.files[0].name;
+        el.style.display = 'block';
+    }
+}
+
+// Drag and drop
+const dropzone = document.getElementById('dropzone');
+dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('dragover'); });
+dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
+dropzone.addEventListener('drop', e => {
+    e.preventDefault();
+    dropzone.classList.remove('dragover');
+    const file = e.dataTransfer.files[0];
+    if (file) {
+        const input = document.getElementById('resume_file');
+        const dt = new DataTransfer();
+        dt.items.add(file);
+        input.files = dt.files;
+        showFilename(input);
+    }
+});
+</script>
+{% endblock %}

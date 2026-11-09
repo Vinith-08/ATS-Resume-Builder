@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="dashboard-hero">
+    <div class="hero-content">
+        <div class="hero-badge">🤖 AI-Powered</div>
+        <h1 class="hero-title">Build Resumes That Beat the ATS</h1>
+        <p class="hero-subtitle">Create tailored resumes, analyze your job match score, identify skill gaps, and prepare for interviews — all in one place.</p>
+        <div class="hero-actions">
+            <a href="{{ url_for('resume_builder') }}" class="btn btn-primary btn-lg">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                </svg>
+                Build Resume
+            </a>
+            <a href="{{ url_for('ats_analyzer') }}" class="btn btn-outline btn-lg">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+                Analyze ATS Score
+            </a>
+        </div>
+    </div>
+    <div class="hero-illustration">
+        <div class="hero-score-card">
+            <div class="score-ring-demo">
+                <svg width="120" height="120" viewBox="0 0 120 120">
+                    <circle cx="60" cy="60" r="50" fill="none" stroke="rgba(168, 85, 247, 0.2)" stroke-width="10"/>
+                    <circle cx="60" cy="60" r="50" fill="none" stroke="url(#scoreGradPurple)" stroke-width="10"
+                        stroke-dasharray="251" stroke-dashoffset="63" stroke-linecap="round"
+                        transform="rotate(-90 60 60)"/>
+                    <defs>
+                        <linearGradient id="scoreGradPurple" x1="0" y1="0" x2="1" y2="1">
+                            <stop offset="0%" stop-color="#9333ea"/>
+                            <stop offset="50%" stop-color="#c084fc"/>
+                            <stop offset="100%" stop-color="#e9d5ff"/>
+                        </linearGradient>
+                    </defs>
+                </svg>
+                <div class="score-ring-label">75%</div>
+            </div>
+            <div class="score-card-label">ATS Match Score</div>
+        </div>
+    </div>
+</div>
+
+<!-- Stats Row -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon stat-icon-purple">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+            </svg>
+        </div>
+        <div class="stat-info">
+            <div class="stat-value">{{ resumes|length }}</div>
+            <div class="stat-label">Resumes Created</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon stat-icon-blue">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+            </svg>
+        </div>
+        <div class="stat-info">
+            <div class="stat-value">{{ stats.total }}</div>
+            <div class="stat-label">Jobs Tracked</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon stat-icon-green">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+            </svg>
+        </div>
+        <div class="stat-info">
+            <div class="stat-value">{{ stats.by_status.get('Interview', 0) }}</div>
+            <div class="stat-label">Interviews</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon stat-icon-amber">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                <polyline points="22 4 12 14.01 9 11.01"/>
+            </svg>
+        </div>
+        <div class="stat-info">
+            <div class="stat-value">{{ stats.by_status.get('Offer', 0) }}</div>
+            <div class="stat-label">Offers Received</div>
+        </div>
+    </div>
+</div>
+
+<!-- Feature Cards -->
+<div class="section-header">
+    <h2 class="section-title">All Features</h2>
+    <p class="section-sub">Everything you need to land your dream job</p>
+</div>
+
+<div class="feature-grid">
+    <a href="{{ url_for('resume_builder') }}" class="feature-card feature-card-1">
+        <div class="feature-icon">📝</div>
+        <h3>Resume Builder</h3>
+        <p>Create structured resumes with education, experience, skills, and projects. Save and manage multiple resumes.</p>
+        <div class="feature-arrow">→</div>
+    </a>
+    <a href="{{ url_for('ats_analyzer') }}" class="feature-card feature-card-2">
+        <div class="feature-icon">🎯</div>
+        <h3>ATS Match Analyzer</h3>
+        <p>Paste a job description and instantly see your match score, matched skills, and missing skills.</p>
+        <div class="feature-arrow">→</div>
+    </a>
+    <a href="{{ url_for('ats_analyzer') }}" class="feature-card feature-card-3">
+        <div class="feature-icon">🔍</div>
+        <h3>Skill Gap Analyzer</h3>
+        <p>Discover exactly which skills you're missing with curated learning resources for each gap.</p>
+        <div class="feature-arrow">→</div>
+    </a>
+    <a href="{{ url_for('templates_page') }}" class="feature-card feature-card-4">
+        <div class="feature-icon">🎨</div>
+        <h3>Resume Templates</h3>
+        <p>Choose from Modern, Classic, or Minimal templates and download a professional PDF instantly.</p>
+        <div class="feature-arrow">→</div>
+    </a>
+    <a href="{{ url_for('interview_prep') }}" class="feature-card feature-card-5">
+        <div class="feature-icon">💬</div>
+        <h3>Interview Prep</h3>
+        <p>Generate HR, technical, and situational interview questions based on the job description.</p>
+        <div class="feature-arrow">→</div>
+    </a>
+    <a href="{{ url_for('tracker') }}" class="feature-card feature-card-6">
+        <div class="feature-icon">📊</div>
+        <h3>Job Tracker</h3>
+        <p>Track every application — company, role, status, dates, and notes — in one organized place.</p>
+        <div class="feature-arrow">→</div>
+    </a>
+</div>
+
+<!-- Recent Resumes -->
+{% if resumes %}
+<div class="section-header">
+    <h2 class="section-title">Recent Resumes</h2>
+    <a href="{{ url_for('resume_builder') }}" class="btn btn-sm btn-outline">+ New Resume</a>
+</div>
+<div class="resume-list">
+    {% for r in resumes[:5] %}
+    <div class="resume-list-item">
+        <div class="resume-avatar">{{ r.full_name[0].upper() if r.full_name else '?' }}</div>
+        <div class="resume-info">
+            <div class="resume-name">{{ r.full_name or 'Unnamed Resume' }}</div>
+            <div class="resume-email">{{ r.email or '' }}</div>
+        </div>
+        <div class="resume-date">{{ r.created_at[:10] if r.created_at else '' }}</div>
+        <div class="resume-actions">
+            <a href="{{ url_for('view_resume', resume_id=r.id) }}" class="btn btn-sm btn-ghost">View</a>
+            <a href="{{ url_for('edit_resume', resume_id=r.id) }}" class="btn btn-sm btn-ghost">Edit</a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+{% endblock %}

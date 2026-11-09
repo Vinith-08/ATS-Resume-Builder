@@ -1,0 +1,225 @@
+{% extends "base.html" %}
+{% block title %}Job Application Tracker{% endblock %}
+{% block page_title %}Job Application Tracker{% endblock %}
+
+{% block content %}
+<!-- Stats Row -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon stat-icon-purple">📨</div>
+        <div class="stat-info">
+            <div class="stat-value">{{ stats.total }}</div>
+            <div class="stat-label">Total Applied</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon stat-icon-blue">🗓️</div>
+        <div class="stat-info">
+            <div class="stat-value">{{ stats.by_status.get('Interview', 0) }}</div>
+            <div class="stat-label">Interviews</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon stat-icon-green">🎉</div>
+        <div class="stat-info">
+            <div class="stat-value">{{ stats.by_status.get('Offer', 0) }}</div>
+            <div class="stat-label">Offers</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon stat-icon-red">❌</div>
+        <div class="stat-info">
+            <div class="stat-value">{{ stats.by_status.get('Rejected', 0) }}</div>
+            <div class="stat-label">Rejected</div>
+        </div>
+    </div>
+</div>
+
+<div class="tracker-layout">
+    <!-- Add Application Form -->
+    <div class="tracker-form-panel">
+        <div class="form-card">
+            <div class="form-card-header">
+                <div class="form-card-icon">➕</div>
+                <div>
+                    <h2 class="form-card-title">Add Application</h2>
+                    <p class="form-card-sub">Track a new job application</p>
+                </div>
+            </div>
+            <form method="POST" action="{{ url_for('add_application') }}" id="addAppForm">
+                <div class="form-group">
+                    <label for="company">Company Name <span class="required">*</span></label>
+                    <input type="text" id="company" name="company" class="form-input" placeholder="e.g., TCS, Infosys, Google" required>
+                </div>
+                <div class="form-group">
+                    <label for="role">Job Role <span class="required">*</span></label>
+                    <input type="text" id="role" name="role" class="form-input" placeholder="e.g., Software Test Engineer" required>
+                </div>
+                <div class="form-grid form-grid-2">
+                    <div class="form-group">
+                        <label for="date_applied">Date Applied</label>
+                        <input type="date" id="date_applied" name="date_applied" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label for="status">Status</label>
+                        <select id="status" name="status" class="form-select">
+                            <option value="Applied">Applied</option>
+                            <option value="Interview">Interview</option>
+                            <option value="Offer">Offer</option>
+                            <option value="Rejected">Rejected</option>
+                            <option value="Withdrawn">Withdrawn</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-grid form-grid-2">
+                    <div class="form-group">
+                        <label for="location">Location</label>
+                        <input type="text" id="location" name="location" class="form-input" placeholder="Chennai / Remote">
+                    </div>
+                    <div class="form-group">
+                        <label for="salary">Salary (LPA)</label>
+                        <input type="text" id="salary" name="salary" class="form-input" placeholder="e.g., 6 LPA">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="job_url">Job URL</label>
+                    <input type="url" id="job_url" name="job_url" class="form-input" placeholder="https://...">
+                </div>
+                <div class="form-group">
+                    <label for="notes">Notes</label>
+                    <textarea id="notes" name="notes" class="form-textarea" rows="3" placeholder="Referral, recruiter name, follow-up date..."></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary w-full">Add Application</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Applications Table -->
+    <div class="tracker-table-panel">
+        <!-- Filters -->
+        <div class="tracker-filters">
+            <input type="text" id="filterSearch" class="form-input" placeholder="🔍 Search company or role..." oninput="filterTable()">
+            <select id="filterStatus" class="form-select" onchange="filterTable()">
+                <option value="">All Statuses</option>
+                <option value="Applied">Applied</option>
+                <option value="Interview">Interview</option>
+                <option value="Offer">Offer</option>
+                <option value="Rejected">Rejected</option>
+                <option value="Withdrawn">Withdrawn</option>
+            </select>
+        </div>
+
+        {% if applications %}
+        <div class="tracker-table-wrapper">
+            <table class="tracker-table" id="appTable">
+                <thead>
+                    <tr>
+                        <th>Company</th>
+                        <th>Role</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                        <th>Location</th>
+                        <th>Notes</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for app in applications %}
+                    <tr class="app-row" data-company="{{ app.company|lower }}" data-role="{{ app.role|lower }}" data-status="{{ app.status }}">
+                        <td class="app-company">
+                            <div class="company-avatar">{{ app.company[0].upper() }}</div>
+                            <div>
+                                <div class="company-name">{{ app.company }}</div>
+                                {% if app.job_url %}<a href="{{ app.job_url }}" target="_blank" class="job-link">View Job ↗</a>{% endif %}
+                            </div>
+                        </td>
+                        <td class="app-role">{{ app.role }}</td>
+                        <td>{{ app.date_applied or '—' }}</td>
+                        <td>
+                            <span class="status-badge status-{{ app.status|lower }}">
+                                {{ app.status }}
+                            </span>
+                        </td>
+                        <td>{{ app.location or '—' }}</td>
+                        <td class="app-notes">{{ app.notes or '—' }}</td>
+                        <td class="app-actions">
+                            <button class="btn btn-sm btn-ghost" onclick="openEditModal({{ app.id }}, '{{ app.company }}', '{{ app.role }}', '{{ app.date_applied }}', '{{ app.status }}', '{{ app.location }}', '{{ app.salary }}', '{{ app.job_url }}', {{ ('`' + app.notes + '`') if app.notes else 'null' }})">Edit</button>
+                            <form method="POST" action="{{ url_for('delete_application', app_id=app.id) }}" style="display:inline" onsubmit="return confirm('Delete this application?')">
+                                <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="ats-placeholder">
+            <div class="placeholder-icon">📋</div>
+            <h3>No Applications Yet</h3>
+            <p>Add your first job application using the form on the left. Track every company you apply to and monitor your progress.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Edit Modal -->
+<div class="modal-overlay" id="editModal">
+    <div class="modal">
+        <div class="modal-header">
+            <h3>Edit Application</h3>
+            <button onclick="closeEditModal()" class="modal-close">✕</button>
+        </div>
+        <form method="POST" id="editForm">
+            <div class="form-grid form-grid-2">
+                <div class="form-group">
+                    <label>Company</label>
+                    <input type="text" name="company" id="edit_company" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label>Role</label>
+                    <input type="text" name="role" id="edit_role" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label>Date Applied</label>
+                    <input type="date" name="date_applied" id="edit_date" class="form-input">
+                </div>
+                <div class="form-group">
+                    <label>Status</label>
+                    <select name="status" id="edit_status" class="form-select">
+                        <option value="Applied">Applied</option>
+                        <option value="Interview">Interview</option>
+                        <option value="Offer">Offer</option>
+                        <option value="Rejected">Rejected</option>
+                        <option value="Withdrawn">Withdrawn</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Location</label>
+                    <input type="text" name="location" id="edit_location" class="form-input">
+                </div>
+                <div class="form-group">
+                    <label>Salary</label>
+                    <input type="text" name="salary" id="edit_salary" class="form-input">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Job URL</label>
+                <input type="url" name="job_url" id="edit_job_url" class="form-input">
+            </div>
+            <div class="form-group">
+                <label>Notes</label>
+                <textarea name="notes" id="edit_notes" class="form-textarea" rows="3"></textarea>
+            </div>
+            <div class="modal-actions">
+                <button type="button" onclick="closeEditModal()" class="btn btn-ghost">Cancel</button>
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/tracker.js') }}"></script>
+{% endblock %}

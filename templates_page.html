@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+{% block title %}Resume Templates{% endblock %}
+{% block page_title %}Resume Templates & PDF Download{% endblock %}
+
+{% block content %}
+<div class="templates-layout">
+    <!-- Template Selector -->
+    <div class="templates-grid-panel">
+        <div class="section-header">
+            <h2 class="section-title">Choose a Template</h2>
+            <p class="section-sub">Select a professional template that suits your target role</p>
+        </div>
+
+        <div class="template-cards">
+            <!-- Modern Template -->
+            <div class="template-card" id="tpl-modern" onclick="selectTemplate('modern')">
+                <div class="template-preview modern-preview">
+                    <div class="tpl-header-bar"></div>
+                    <div class="tpl-name-block"></div>
+                    <div class="tpl-line tpl-line-wide"></div>
+                    <div class="tpl-line tpl-line-medium"></div>
+                    <div class="tpl-divider"></div>
+                    <div class="tpl-line"></div>
+                    <div class="tpl-line tpl-line-wide"></div>
+                    <div class="tpl-line"></div>
+                    <div class="tpl-line tpl-line-medium"></div>
+                </div>
+                <div class="template-card-info">
+                    <div class="template-name">Modern</div>
+                    <div class="template-desc">Clean layout with royal purple header. High ATS ranking.</div>
+                    <span class="template-badge tpl-badge-modern">Popular</span>
+                </div>
+                <div class="template-check" id="check-modern"></div>
+            </div>
+
+            <!-- Classic Template -->
+            <div class="template-card" id="tpl-classic" onclick="selectTemplate('classic')">
+                <div class="template-preview classic-preview">
+                    <div class="tpl-classic-header"></div>
+                    <div class="tpl-line tpl-line-wide"></div>
+                    <div class="tpl-line"></div>
+                    <div class="tpl-classic-rule"></div>
+                    <div class="tpl-line tpl-line-wide"></div>
+                    <div class="tpl-line tpl-line-medium"></div>
+                    <div class="tpl-classic-rule"></div>
+                    <div class="tpl-line"></div>
+                    <div class="tpl-line tpl-line-wide"></div>
+                </div>
+                <div class="template-card-info">
+                    <div class="template-name">Classic</div>
+                    <div class="template-desc">Traditional single-column format. Ideal for formal industries.</div>
+                    <span class="template-badge tpl-badge-classic">Professional</span>
+                </div>
+                <div class="template-check" id="check-classic"></div>
+            </div>
+
+            <!-- Minimal Template -->
+            <div class="template-card" id="tpl-minimal" onclick="selectTemplate('minimal')">
+                <div class="template-preview minimal-preview">
+                    <div class="tpl-min-name"></div>
+                    <div class="tpl-line tpl-line-medium"></div>
+                    <div style="height:8px"></div>
+                    <div class="tpl-min-section"></div>
+                    <div class="tpl-line tpl-line-wide"></div>
+                    <div class="tpl-line"></div>
+                    <div class="tpl-min-section"></div>
+                    <div class="tpl-line tpl-line-wide"></div>
+                    <div class="tpl-line tpl-line-medium"></div>
+                </div>
+                <div class="template-card-info">
+                    <div class="template-name">Minimal</div>
+                    <div class="template-desc">Ultra-clean minimalist design. Modern and ATS-friendly.</div>
+                    <span class="template-badge tpl-badge-minimal">ATS-Friendly</span>
+                </div>
+                <div class="template-check" id="check-minimal"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Download Panel -->
+    <div class="download-panel">
+        <div class="form-card">
+            <div class="form-card-header">
+                <div class="form-card-icon">📄</div>
+                <div>
+                    <h2 class="form-card-title">Generate PDF</h2>
+                    <p class="form-card-sub">Select resume and template, then download</p>
+                </div>
+            </div>
+
+            <form method="POST" action="{{ url_for('download_pdf') }}" id="pdfForm">
+                <input type="hidden" name="template_name" id="selectedTemplate" value="modern">
+
+                <div class="form-group">
+                    <label for="resume_id">Select Resume</label>
+                    <select id="resume_id" name="resume_id" class="form-select" required>
+                        <option value="">-- Select a resume --</option>
+                        {% for r in resume_list %}
+                        <option value="{{ r.id }}">{{ r.full_name }} ({{ r.email }})</option>
+                        {% endfor %}
+                    </select>
+                    {% if not resume_list %}
+                    <div class="form-hint">No resumes saved yet. <a href="{{ url_for('resume_builder') }}">Create one first →</a></div>
+                    {% endif %}
+                </div>
+
+                <div class="selected-template-display">
+                    <div class="std-label">Selected Template:</div>
+                    <div class="std-name" id="selectedTemplateName">Modern</div>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-lg w-full" id="downloadBtn">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+                    </svg>
+                    Download PDF Resume
+                </button>
+            </form>
+
+            <div class="download-tips">
+                <h4>📌 PDF Tips</h4>
+                <ul>
+                    <li>Fill out your resume completely before downloading</li>
+                    <li>Modern template is best for tech/IT roles</li>
+                    <li>Classic template is best for formal sectors (banking, gov)</li>
+                    <li>Minimal template has the highest ATS compatibility</li>
+                    <li>PDF is generated with all sections you filled in the builder</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let selectedTemplate = 'modern';
+
+function selectTemplate(name) {
+    // Remove all active states
+    document.querySelectorAll('.template-card').forEach(c => c.classList.remove('active'));
+    document.querySelectorAll('.template-check').forEach(c => c.classList.remove('visible'));
+
+    // Set active
+    document.getElementById('tpl-' + name).classList.add('active');
+    document.getElementById('check-' + name).classList.add('visible');
+    document.getElementById('selectedTemplate').value = name;
+
+    const names = { modern: 'Modern', classic: 'Classic', minimal: 'Minimal' };
+    document.getElementById('selectedTemplateName').textContent = names[name];
+    selectedTemplate = name;
+}
+
+// Default selection
+selectTemplate('modern');
+</script>
+{% endblock %}

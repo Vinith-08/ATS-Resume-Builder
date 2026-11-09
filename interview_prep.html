@@ -1,0 +1,181 @@
+{% extends "base.html" %}
+{% block title %}Interview Preparation{% endblock %}
+{% block page_title %}Interview Question Generator{% endblock %}
+
+{% block content %}
+<div class="interview-layout">
+    <!-- Input Panel -->
+    <div class="interview-input">
+        <div class="form-card">
+            <div class="form-card-header">
+                <div class="form-card-icon">💬</div>
+                <div>
+                    <h2 class="form-card-title">Generate Questions</h2>
+                    <p class="form-card-sub">AI-powered from your job description</p>
+                </div>
+            </div>
+            <form method="POST">
+                <div class="form-group">
+                    <label for="resume_id">Reference Resume (optional)</label>
+                    <select id="resume_id" name="resume_id" class="form-select">
+                        <option value="">-- None --</option>
+                        {% for r in resume_list %}
+                        <option value="{{ r.id }}">{{ r.full_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="job_description">Job Description <span class="required">*</span></label>
+                    <textarea id="job_description" name="job_description" class="form-textarea" rows="12"
+                        placeholder="Paste the job description here...&#10;&#10;The more detailed, the more relevant questions you'll get!" required>{{ request.form.get('job_description', '') }}</textarea>
+                </div>
+                <button type="submit" class="btn btn-primary btn-lg w-full">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                    </svg>
+                    Generate Questions
+                </button>
+            </form>
+
+            {% if not questions %}
+            <div class="interview-tips-box">
+                <h4>💡 How to use this</h4>
+                <ol>
+                    <li>Paste the job description</li>
+                    <li>Get HR, technical &amp; situational questions</li>
+                    <li>Expand each question to see a model answer</li>
+                    <li>Practice out loud before your interview!</li>
+                </ol>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Questions Panel -->
+    <div class="interview-questions">
+        {% if questions %}
+        <div class="questions-header">
+            <div class="questions-count-chips">
+                <span class="count-chip chip-hr">{{ questions.hr|length }} HR</span>
+                <span class="count-chip chip-tech">{{ questions.technical|length }} Technical</span>
+                <span class="count-chip chip-sit">{{ questions.situational|length }} Situational</span>
+            </div>
+            {% if questions.role_hints %}
+            <div class="role-hints">
+                Role detected: {% for r in questions.role_hints %}<span class="role-tag">{{ r }}</span>{% endfor %}
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Technical Questions -->
+        <div class="q-section">
+            <h3 class="q-section-title">
+                <span class="q-section-icon">🛠️</span>
+                Technical Questions
+                <span class="q-count">{{ questions.technical|length }}</span>
+            </h3>
+            <div class="q-list">
+                {% for q in questions.technical %}
+                <div class="q-item" onclick="toggleAnswer(this)">
+                    <div class="q-header">
+                        <div class="q-skill-tag">{{ q.skill }}</div>
+                        <div class="q-text">{{ q.question }}</div>
+                        <div class="q-toggle">▼</div>
+                    </div>
+                    <div class="q-answer">
+                        <div class="q-answer-label">💡 Model Answer</div>
+                        <p>{{ q.answer }}</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- HR Questions -->
+        <div class="q-section">
+            <h3 class="q-section-title">
+                <span class="q-section-icon">👔</span>
+                HR & Behavioral Questions
+                <span class="q-count">{{ questions.hr|length }}</span>
+            </h3>
+            <div class="q-list">
+                {% for q, a in questions.hr %}
+                <div class="q-item" onclick="toggleAnswer(this)">
+                    <div class="q-header">
+                        <div class="q-skill-tag">HR</div>
+                        <div class="q-text">{{ q }}</div>
+                        <div class="q-toggle">▼</div>
+                    </div>
+                    <div class="q-answer">
+                        <div class="q-answer-label">💡 How to Answer</div>
+                        <p>{{ a }}</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Situational Questions -->
+        <div class="q-section">
+            <h3 class="q-section-title">
+                <span class="q-section-icon">🧩</span>
+                Situational Questions
+                <span class="q-count">{{ questions.situational|length }}</span>
+            </h3>
+            <div class="q-list">
+                {% for q, a in questions.situational %}
+                <div class="q-item" onclick="toggleAnswer(this)">
+                    <div class="q-header">
+                        <div class="q-skill-tag">Situational</div>
+                        <div class="q-text">{{ q }}</div>
+                        <div class="q-toggle">▼</div>
+                    </div>
+                    <div class="q-answer">
+                        <div class="q-answer-label">💡 How to Approach</div>
+                        <p>{{ a }}</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="interview-actions">
+            <button onclick="expandAll()" class="btn btn-ghost btn-sm">Expand All Answers</button>
+            <button onclick="collapseAll()" class="btn btn-ghost btn-sm">Collapse All</button>
+        </div>
+
+        {% else %}
+        <!-- Placeholder -->
+        <div class="ats-placeholder">
+            <div class="placeholder-icon">🤔</div>
+            <h3>Questions will appear here</h3>
+            <p>Paste a job description and click <strong>Generate Questions</strong> to get personalized interview questions organized by category, with model answers to help you practice.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function toggleAnswer(item) {
+    item.classList.toggle('open');
+    const toggle = item.querySelector('.q-toggle');
+    toggle.textContent = item.classList.contains('open') ? '▲' : '▼';
+}
+
+function expandAll() {
+    document.querySelectorAll('.q-item').forEach(item => {
+        item.classList.add('open');
+        item.querySelector('.q-toggle').textContent = '▲';
+    });
+}
+
+function collapseAll() {
+    document.querySelectorAll('.q-item').forEach(item => {
+        item.classList.remove('open');
+        item.querySelector('.q-toggle').textContent = '▼';
+    });
+}
+</script>
+{% endblock %}

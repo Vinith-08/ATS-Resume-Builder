@@ -1,0 +1,216 @@
+{% extends "base.html" %}
+{% block title %}ATS Analyzer{% endblock %}
+{% block page_title %}ATS Match Analyzer{% endblock %}
+
+{% block content %}
+<div class="ats-layout">
+    <!-- Input Panel -->
+    <div class="ats-input-panel">
+        <div class="form-card">
+            <div class="form-card-header">
+                <div class="form-card-icon">🎯</div>
+                <div>
+                    <h2 class="form-card-title">Analyze Your Resume</h2>
+                    <p class="form-card-sub">Compare your resume against a job description</p>
+                </div>
+            </div>
+
+            <form method="POST" id="atsForm">
+                <!-- Resume Source Toggle -->
+                <div class="toggle-group">
+                    <button type="button" class="toggle-btn active" id="btnPaste" onclick="switchMode('paste')">Paste Text</button>
+                    <button type="button" class="toggle-btn" id="btnSaved" onclick="switchMode('saved')">Use Saved Resume</button>
+                </div>
+
+                <!-- Paste Mode -->
+                <div id="pasteMode">
+                    <div class="form-group">
+                        <label for="resume_text">Your Resume Text</label>
+                        <textarea id="resume_text" name="resume_text" class="form-textarea" rows="8"
+                            placeholder="Paste your full resume text here...&#10;&#10;Example:&#10;Software Tester with 2 years of experience in manual testing, Selenium, Java, SQL, and API testing. Proficient in Jira, Agile methodology, and functional testing. Experience with Python scripting for test automation."></textarea>
+                    </div>
+                </div>
+
+                <!-- Saved Resume Mode -->
+                <div id="savedMode" style="display:none;">
+                    <div class="form-group">
+                        <label for="resume_id">Select a Saved Resume</label>
+                        <select id="resume_id" name="resume_id" class="form-select">
+                            <option value="">-- Select Resume --</option>
+                            {% for r in resume_list %}
+                            <option value="{{ r.id }}">{{ r.full_name }} ({{ r.email }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="job_description">Job Description <span class="required">*</span></label>
+                    <textarea id="job_description" name="job_description" class="form-textarea" rows="10"
+                        placeholder="Paste the complete job description here...&#10;&#10;Example:&#10;We are looking for a Software Test Engineer with experience in manual testing, Selenium, Java, SQL, Python, API testing, and JIRA. The candidate should have knowledge of Agile methodology and regression testing." required></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-lg w-full" id="analyzeBtn">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                    </svg>
+                    Analyze ATS Match
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Results Panel -->
+    <div class="ats-results-panel">
+        {% if result %}
+            {% if result.error %}
+            <div class="alert alert-warning">
+                <span>⚠️</span> {{ result.error }}
+            </div>
+            {% else %}
+            <!-- Score Card -->
+            <div class="score-card-main">
+                <div class="score-label">ATS Match Score</div>
+                <div class="score-ring-container" id="scoreRingContainer">
+                    <svg class="score-ring" width="160" height="160" viewBox="0 0 160 160">
+                        <defs>
+                            <linearGradient id="purpleRingGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#9333ea"/>
+                                <stop offset="60%" stop-color="#c084fc"/>
+                                <stop offset="100%" stop-color="#f3e8ff"/>
+                            </linearGradient>
+                            <filter id="purpleRingGlow" x="-20%" y="-20%" width="140%" height="140%">
+                                <feDropShadow dx="0" dy="0" stdDeviation="4" flood-color="#a855f7" flood-opacity="0.6"/>
+                            </filter>
+                        </defs>
+                        <circle cx="80" cy="80" r="66" fill="none" stroke="rgba(168, 85, 247, 0.2)" stroke-width="12"/>
+                        <circle cx="80" cy="80" r="66" fill="none"
+                            stroke="url(#purpleRingGrad)"
+                            stroke-width="12"
+                            filter="url(#purpleRingGlow)"
+                            stroke-dasharray="{{ (result.score / 100 * 414.69)|round|int }} 414"
+                            stroke-linecap="round"
+                            transform="rotate(-90 80 80)"
+                            class="score-circle"
+                            id="scoreCircle"/>
+                    </svg>
+                    <div class="score-ring-center">
+                        <div class="score-number" id="scoreNumber">{{ result.score }}%</div>
+                        <div class="score-status {{ 'good' if result.score >= 70 else 'ok' if result.score >= 40 else 'low' }}">
+                            {{ 'Excellent' if result.score >= 70 else 'Good' if result.score >= 40 else 'Low' }}
+                        </div>
+                    </div>
+                </div>
+                <div class="score-meta">
+                    Matched <strong>{{ result.matched|length }}</strong> of <strong>{{ result.jd_skills|length }}</strong> skills
+                    &nbsp;·&nbsp; Keyword Density: <strong>{{ result.keyword_density }}%</strong>
+                </div>
+            </div>
+
+            <!-- Tips -->
+            {% if result.tips %}
+            <div class="tips-card">
+                <h3 class="tips-title">💡 Improvement Tips</h3>
+                <ul class="tips-list">
+                    {% for tip in result.tips %}
+                    <li>{{ tip }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+
+            <!-- Matched Skills -->
+            <div class="skills-section">
+                <h3 class="skills-section-title skills-matched-title">
+                    ✅ Matched Skills ({{ result.matched|length }})
+                </h3>
+                <div class="skills-cloud">
+                    {% for skill, cat in result.matched.items() %}
+                    <span class="skill-badge skill-matched" title="{{ cat.replace('_',' ').title() }}">{{ skill }}</span>
+                    {% endfor %}
+                    {% if not result.matched %}
+                    <span class="skills-empty">No matched skills found</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Missing Skills -->
+            <div class="skills-section">
+                <h3 class="skills-section-title skills-missing-title">
+                    ❌ Missing Skills ({{ result.missing|length }})
+                </h3>
+                <div class="skills-cloud">
+                    {% for skill, cat in result.missing.items() %}
+                    <span class="skill-badge skill-missing" title="{{ cat.replace('_',' ').title() }}">{{ skill }}</span>
+                    {% endfor %}
+                    {% if not result.missing %}
+                    <span class="skills-empty">🎉 No skill gaps found!</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Skill Gap Analysis with Resources -->
+            {% if result.gap_analysis %}
+            <div class="gap-card">
+                <h3 class="gap-title">📚 Skill Gap — Learning Resources</h3>
+                <div class="gap-list">
+                    {% for gap in result.gap_analysis %}
+                    <div class="gap-item">
+                        <div class="gap-item-info">
+                            <span class="gap-skill">{{ gap.skill }}</span>
+                            <span class="gap-category">{{ gap.category }}</span>
+                        </div>
+                        <a href="{{ gap.resource }}" target="_blank" rel="noopener" class="btn btn-sm btn-outline">Learn →</a>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Actions -->
+            <div class="ats-actions">
+                <a href="{{ url_for('interview_prep') }}" class="btn btn-primary">
+                    💬 Generate Interview Questions
+                </a>
+                <a href="{{ url_for('templates_page') }}" class="btn btn-outline">
+                    🎨 Download Resume PDF
+                </a>
+            </div>
+            {% endif %}
+        {% else %}
+        <!-- Placeholder when no result -->
+        <div class="ats-placeholder">
+            <div class="placeholder-icon">🎯</div>
+            <h3>Ready to Analyze</h3>
+            <p>Paste your resume text and a job description, then click <strong>Analyze ATS Match</strong> to see your score, matched skills, missing skills, and personalized improvement tips.</p>
+            <div class="placeholder-steps">
+                <div class="p-step"><span class="p-step-num">1</span> Paste resume or select saved</div>
+                <div class="p-step"><span class="p-step-num">2</span> Paste job description</div>
+                <div class="p-step"><span class="p-step-num">3</span> See your ATS match score</div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function switchMode(mode) {
+    document.getElementById('pasteMode').style.display = mode === 'paste' ? 'block' : 'none';
+    document.getElementById('savedMode').style.display = mode === 'saved' ? 'block' : 'none';
+    document.getElementById('resume_id').disabled = mode === 'paste';
+    document.getElementById('resume_text').disabled = mode === 'saved';
+    document.getElementById('btnPaste').classList.toggle('active', mode === 'paste');
+    document.getElementById('btnSaved').classList.toggle('active', mode === 'saved');
+}
+
+// Animate score ring on load
+window.addEventListener('load', () => {
+    const circle = document.getElementById('scoreCircle');
+    if (circle) {
+        circle.style.transition = 'stroke-dasharray 1.5s ease-in-out';
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% block title %}View Resume{% endblock %}
+{% block page_title %}Resume Preview{% endblock %}
+
+{% block content %}
+<div class="resume-view-header">
+    <div class="resume-view-actions">
+        <a href="{{ url_for('edit_resume', resume_id=resume.id) }}" class="btn btn-outline">✏️ Edit</a>
+        <a href="{{ url_for('ats_analyzer') }}" class="btn btn-outline">🎯 Analyze ATS</a>
+        <a href="{{ url_for('templates_page') }}" class="btn btn-primary">📄 Download PDF</a>
+        <form method="POST" action="{{ url_for('delete_resume', resume_id=resume.id) }}" style="display:inline" onsubmit="return confirm('Delete this resume?')">
+            <button class="btn btn-danger">🗑️ Delete</button>
+        </form>
+    </div>
+</div>
+
+<!-- Resume Preview Card -->
+<div class="resume-preview-card">
+    <!-- Header -->
+    <div class="rp-header">
+        <div class="rp-avatar">{{ resume.full_name[0].upper() if resume.full_name else '?' }}</div>
+        <div class="rp-header-info">
+            <h1 class="rp-name">{{ resume.full_name or 'Name' }}</h1>
+            <div class="rp-contacts">
+                {% if resume.email %}<span>✉️ {{ resume.email }}</span>{% endif %}
+                {% if resume.phone %}<span>📞 {{ resume.phone }}</span>{% endif %}
+                {% if resume.location %}<span>📍 {{ resume.location }}</span>{% endif %}
+                {% if resume.linkedin %}<a href="{{ resume.linkedin }}" target="_blank">🔗 LinkedIn</a>{% endif %}
+                {% if resume.portfolio %}<a href="{{ resume.portfolio }}" target="_blank">💻 Portfolio</a>{% endif %}
+            </div>
+        </div>
+    </div>
+
+    {% if resume.summary %}
+    <div class="rp-section">
+        <div class="rp-section-title">Professional Summary</div>
+        <p class="rp-summary">{{ resume.summary }}</p>
+    </div>
+    {% endif %}
+
+    {% if resume.skills %}
+    <div class="rp-section">
+        <div class="rp-section-title">Skills</div>
+        <div class="skills-cloud">
+            {% for skill in resume.skills.replace('\n', ',').split(',') %}
+                {% if skill.strip() %}
+                <span class="skill-badge skill-neutral">{{ skill.strip() }}</span>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    {% if resume.experience %}
+    <div class="rp-section">
+        <div class="rp-section-title">Work Experience</div>
+        {% for exp in resume.experience %}
+        <div class="rp-exp-item">
+            <div class="rp-exp-header">
+                <div class="rp-exp-role">{{ exp.role }}</div>
+                <div class="rp-exp-meta">{{ exp.company }}{% if exp.duration %} · {{ exp.duration }}{% endif %}</div>
+            </div>
+            {% if exp.description %}
+            <div class="rp-exp-desc">
+                {% for line in exp.description.split('\n') %}{% if line.strip() %}<div class="rp-bullet">{{ line.strip().lstrip('•-').strip() }}</div>{% endif %}{% endfor %}
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if resume.education %}
+    <div class="rp-section">
+        <div class="rp-section-title">Education</div>
+        {% for edu in resume.education %}
+        <div class="rp-edu-item">
+            <div class="rp-edu-degree">{{ edu.degree }}</div>
+            <div class="rp-edu-meta">{{ edu.institution }}{% if edu.year %} · {{ edu.year }}{% endif %}{% if edu.grade %} · {{ edu.grade }}{% endif %}</div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if resume.projects %}
+    <div class="rp-section">
+        <div class="rp-section-title">Projects</div>
+        {% for proj in resume.projects %}
+        <div class="rp-exp-item">
+            <div class="rp-exp-header">
+                <div class="rp-exp-role">{{ proj.title }}</div>
+                {% if proj.tech %}<div class="rp-exp-meta">{{ proj.tech }}</div>{% endif %}
+            </div>
+            {% if proj.description %}
+            <div class="rp-exp-desc">
+                {% for line in proj.description.split('\n') %}{% if line.strip() %}<div class="rp-bullet">{{ line.strip().lstrip('•-').strip() }}</div>{% endif %}{% endfor %}
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if resume.certifications %}
+    <div class="rp-section">
+        <div class="rp-section-title">Certifications</div>
+        {% for cert in resume.certifications.split('\n') %}
+            {% if cert.strip() %}
+            <div class="rp-bullet">🏆 {{ cert.strip().lstrip('•-').strip() }}</div>
+            {% endif %}
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

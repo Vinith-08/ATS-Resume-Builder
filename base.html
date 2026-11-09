@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+    <meta name="theme-color" content="#08001a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="description" content="AI-Powered ATS Resume Builder — Create ATS-optimized resumes, analyze job matches, and prepare for interviews.">
+    <title>{% block title %}ATS Resume Builder{% endblock %} — AI-Powered</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block head %}{% endblock %}
+</head>
+<body>
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-brand">
+            <div class="brand-icon">
+                <svg width="30" height="30" viewBox="0 0 28 28" fill="none">
+                    <rect width="28" height="28" rx="8" fill="url(#gradPurpleBrand)"/>
+                    <path d="M7 8h14M7 12h10M7 16h12M7 20h8" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+                    <circle cx="21" cy="19" r="4.5" fill="#ffffff" opacity="0.95"/>
+                    <path d="M19.2 19l1.2 1.2 2.4-2.4" stroke="#7c3aed" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                    <defs>
+                        <linearGradient id="gradPurpleBrand" x1="0" y1="0" x2="28" y2="28" gradientUnits="userSpaceOnUse">
+                            <stop stop-color="#9333ea"/>
+                            <stop offset="0.5" stop-color="#a855f7"/>
+                            <stop offset="1" stop-color="#c084fc"/>
+                        </linearGradient>
+                    </defs>
+                </svg>
+            </div>
+            <div class="brand-text">
+                <span class="brand-name">ATS Builder</span>
+                <span class="brand-sub">AI-Powered</span>
+            </div>
+            <button class="sidebar-close-btn" onclick="toggleSidebar()" aria-label="Close menu">✕</button>
+        </div>
+
+        <nav class="sidebar-nav">
+            <div class="nav-section-label">Main</div>
+            <a href="{{ url_for('dashboard') }}" class="nav-item {% if request.endpoint == 'dashboard' %}active{% endif %}" id="nav-dashboard">
+                <span class="nav-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+                        <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
+                    </svg>
+                </span>
+                <span class="nav-label">Dashboard</span>
+            </a>
+            <a href="{{ url_for('resume_builder') }}" class="nav-item {% if request.endpoint in ['resume_builder', 'view_resume', 'edit_resume'] %}active{% endif %}" id="nav-resume">
+                <span class="nav-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/>
+                        <line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>
+                    </svg>
+                </span>
+                <span class="nav-label">Resume Builder</span>
+                <span class="nav-badge">New</span>
+            </a>
+
+            <div class="nav-section-label">Tools</div>
+            <a href="{{ url_for('ats_analyzer') }}" class="nav-item {% if request.endpoint == 'ats_analyzer' %}active{% endif %}" id="nav-ats">
+                <span class="nav-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <polyline points="12 6 12 12 16 14"/>
+                    </svg>
+                </span>
+                <span class="nav-label">ATS Analyzer</span>
+            </a>
+            <a href="{{ url_for('templates_page') }}" class="nav-item {% if request.endpoint == 'templates_page' %}active{% endif %}" id="nav-templates">
+                <span class="nav-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/>
+                    </svg>
+                </span>
+                <span class="nav-label">Resume Templates</span>
+            </a>
+            <a href="{{ url_for('interview_prep') }}" class="nav-item {% if request.endpoint == 'interview_prep' %}active{% endif %}" id="nav-interview">
+                <span class="nav-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                    </svg>
+                </span>
+                <span class="nav-label">Interview Prep</span>
+            </a>
+            <a href="{{ url_for('tracker') }}" class="nav-item {% if request.endpoint == 'tracker' %}active{% endif %}" id="nav-tracker">
+                <span class="nav-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+                    </svg>
+                </span>
+                <span class="nav-label">Job Tracker</span>
+            </a>
+            <a href="{{ url_for('upload_resume') }}" class="nav-item {% if request.endpoint == 'upload_resume' %}active{% endif %}" id="nav-upload">
+                <span class="nav-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+                    </svg>
+                </span>
+                <span class="nav-label">Upload Resume</span>
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="sidebar-footer-card">
+                <div class="footer-icon">🎓</div>
+                <div>
+                    <div class="footer-title">MCA Mini Project</div>
+                    <div class="footer-sub">AI-Powered ATS System</div>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Mobile Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+    <!-- Main Content -->
+    <div class="main-wrapper">
+        <!-- Top Bar -->
+        <header class="topbar">
+            <button class="menu-btn" id="menuBtn" onclick="toggleSidebar()" aria-label="Toggle menu">
+                <span></span><span></span><span></span>
+            </button>
+            <div class="topbar-title">{% block page_title %}Dashboard{% endblock %}</div>
+            <div class="topbar-right">
+                <div class="topbar-chip">
+                    <span class="chip-dot"></span>
+                    <span>Live</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="flash-container" id="flashContainer">
+            {% for category, message in messages %}
+            <div class="flash flash-{{ category }}">
+                <span>{{ message }}</span>
+                <button onclick="this.parentElement.remove()" class="flash-close">✕</button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+
+        <!-- Page Content -->
+        <main class="page-content">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>
