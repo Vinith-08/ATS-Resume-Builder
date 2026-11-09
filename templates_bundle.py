@@ -1,12 +1,14 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """
 Embedded Frontend Assets Bundle
-Automatically self-extracts templates and static files on boot
+Automatically self-extracts templates and static files on boot.
+100% Clean ASCII with SVG vector graphics - Zero Mojibake Guarantee.
 """
 import os
 
 ASSETS = {
-    'templates/base.html': r"""<!DOCTYPE html>
+    'templates/base.html': r"""
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -14,8 +16,8 @@ ASSETS = {
     <meta name="theme-color" content="#08001a">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="description" content="AI-Powered ATS Resume Builder — Create ATS-optimized resumes, analyze job matches, and prepare for interviews.">
-    <title>{% block title %}ATS Resume Builder{% endblock %} — AI-Powered</title>
+    <meta name="description" content="AI-Powered ATS Resume Builder - Create ATS-optimized resumes, analyze job matches, and prepare for interviews.">
+    <title>{% block title %}ATS Resume Builder{% endblock %} - AI-Powered</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -45,7 +47,7 @@ ASSETS = {
                 <span class="brand-name">ATS Builder</span>
                 <span class="brand-sub">AI-Powered</span>
             </div>
-            <button class="sidebar-close-btn" onclick="toggleSidebar()" aria-label="Close menu">✕</button>
+            <button class="sidebar-close-btn" onclick="toggleSidebar()" aria-label="Close menu">&times;</button>
         </div>
 
         <nav class="sidebar-nav">
@@ -72,6 +74,17 @@ ASSETS = {
             </a>
 
             <div class="nav-section-label">Tools</div>
+            <a href="{{ url_for('pdf_rebuilder') }}" class="nav-item {% if request.endpoint == 'pdf_rebuilder' %}active{% endif %}" id="nav-rebuilder">
+                <span class="nav-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14 2 14 8 20 8"/>
+                        <path d="M12 18v-6M9 15l3-3 3 3"/>
+                    </svg>
+                </span>
+                <span class="nav-label">PDF Rebuilder</span>
+                <span class="nav-badge" style="background: rgba(147, 51, 234, 0.4); color: #e9d5ff; border: 1px solid rgba(192, 132, 252, 0.4);">New</span>
+            </a>
             <a href="{{ url_for('ats_analyzer') }}" class="nav-item {% if request.endpoint == 'ats_analyzer' %}active{% endif %}" id="nav-ats">
                 <span class="nav-icon">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -158,7 +171,7 @@ ASSETS = {
             {% for category, message in messages %}
             <div class="flash flash-{{ category }}">
                 <span>{{ message }}</span>
-                <button onclick="this.parentElement.remove()" class="flash-close">✕</button>
+                <button onclick="this.parentElement.remove()" class="flash-close">&times;</button>
             </div>
             {% endfor %}
         </div>
@@ -176,209 +189,2069 @@ ASSETS = {
 </body>
 </html>
 """,
-    'static/js/tracker.js': r"""// ── Job Tracker JavaScript ────────────────────────────────────────────────────
+    'templates/index.html': r"""
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
 
-function filterTable() {
-    const search = document.getElementById('filterSearch').value.toLowerCase();
-    const status = document.getElementById('filterStatus').value;
-    const rows = document.querySelectorAll('.app-row');
-
-    rows.forEach(row => {
-        const company = row.dataset.company || '';
-        const role = row.dataset.role || '';
-        const rowStatus = row.dataset.status || '';
-
-        const matchSearch = !search || company.includes(search) || role.includes(search);
-        const matchStatus = !status || rowStatus === status;
-
-        row.style.display = matchSearch && matchStatus ? '' : 'none';
-    });
-}
-
-function openEditModal(id, company, role, date, status, location, salary, jobUrl, notes) {
-    document.getElementById('edit_company').value = company || '';
-    document.getElementById('edit_role').value = role || '';
-    document.getElementById('edit_date').value = date || '';
-    document.getElementById('edit_status').value = status || 'Applied';
-    document.getElementById('edit_location').value = location || '';
-    document.getElementById('edit_salary').value = salary || '';
-    document.getElementById('edit_job_url').value = jobUrl || '';
-    document.getElementById('edit_notes').value = notes ? notes.replace(/`/g, '') : '';
-
-    const form = document.getElementById('editForm');
-    form.action = `/tracker/${id}/update`;
-
-    document.getElementById('editModal').classList.add('open');
-}
-
-function closeEditModal() {
-    document.getElementById('editModal').classList.remove('open');
-}
-
-// Close modal on overlay click
-document.getElementById('editModal').addEventListener('click', (e) => {
-    if (e.target === e.currentTarget) closeEditModal();
-});
-
-// Set today as default date for new applications
-document.addEventListener('DOMContentLoaded', () => {
-    const dateInput = document.getElementById('date_applied');
-    if (dateInput && !dateInput.value) {
-        dateInput.value = new Date().toISOString().split('T')[0];
-    }
-});
-""",
-    'static/js/main.js': r"""// ── Mobile Responsive Sidebar Toggle ─────────────────────────────────────────
-function toggleSidebar(forceState) {
-    const sidebar = document.getElementById('sidebar');
-    const overlay = document.getElementById('sidebarOverlay');
-    const menuBtn = document.getElementById('menuBtn');
-    
-    const shouldOpen = (typeof forceState === 'boolean') ? forceState : !sidebar.classList.contains('open');
-    
-    if (shouldOpen) {
-        sidebar.classList.add('open');
-        overlay.classList.add('open');
-        if (menuBtn) menuBtn.classList.add('open');
-        document.body.style.overflow = window.innerWidth <= 768 ? 'hidden' : '';
-    } else {
-        sidebar.classList.remove('open');
-        overlay.classList.remove('open');
-        if (menuBtn) menuBtn.classList.remove('open');
-        document.body.style.overflow = '';
-    }
-}
-
-// Close sidebar when clicking any navigation link on small screens
-document.addEventListener('DOMContentLoaded', () => {
-    const navItems = document.querySelectorAll('.sidebar .nav-item');
-    navItems.forEach(item => {
-        item.addEventListener('click', () => {
-            if (window.innerWidth <= 768) {
-                toggleSidebar(false);
-            }
-        });
-    });
-
-    // Handle Escape key to close mobile menu or open modals
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') {
-            toggleSidebar(false);
-            const openModal = document.querySelector('.modal-overlay.open');
-            if (openModal) openModal.classList.remove('open');
-        }
-    });
-
-    // Auto-dismiss flash notifications after 5 seconds
-    const flashes = document.querySelectorAll('.flash');
-    flashes.forEach(f => {
-        setTimeout(() => {
-            f.style.opacity = '0';
-            f.style.transform = 'translateY(-8px)';
-            f.style.transition = 'all 0.3s ease';
-            setTimeout(() => f.remove(), 300);
-        }, 5000);
-    });
-
-    // Smooth count-up animation for stat numbers
-    document.querySelectorAll('.stat-value').forEach(el => {
-        const target = parseInt(el.textContent.trim());
-        if (!isNaN(target) && target > 0) {
-            animateCount(el, 0, target, 800);
-        }
-    });
-});
-
-function animateCount(el, start, end, duration) {
-    const startTime = performance.now();
-    const update = (currentTime) => {
-        const elapsed = currentTime - startTime;
-        const progress = Math.min(elapsed / duration, 1);
-        const eased = 1 - Math.pow(1 - progress, 3);
-        el.textContent = Math.round(start + (end - start) * eased);
-        if (progress < 1) requestAnimationFrame(update);
-    };
-    requestAnimationFrame(update);
-}
-
-// ── Interactive Purple Ripple Effect on Buttons ───────────────────────────────
-document.addEventListener('click', (e) => {
-    const btn = e.target.closest('.btn-primary, .btn-outline, .btn-ghost');
-    if (!btn) return;
-
-    const ripple = document.createElement('span');
-    const rect = btn.getBoundingClientRect();
-    const size = Math.max(rect.width, rect.height);
-
-    ripple.style.cssText = `
-        position: absolute;
-        width: ${size}px;
-        height: ${size}px;
-        border-radius: 50%;
-        background: rgba(232, 121, 249, 0.35);
-        top: ${e.clientY - rect.top - size / 2}px;
-        left: ${e.clientX - rect.left - size / 2}px;
-        transform: scale(0);
-        animation: purpleRipple 0.55s ease-out;
-        pointer-events: none;
-    `;
-
-    if (!document.getElementById('purpleRippleStyle')) {
-        const style = document.createElement('style');
-        style.id = 'purpleRippleStyle';
-        style.textContent = '@keyframes purpleRipple { to { transform: scale(2.6); opacity: 0; } }';
-        document.head.appendChild(style);
-    }
-
-    btn.style.position = 'relative';
-    btn.style.overflow = 'hidden';
-    btn.appendChild(ripple);
-    setTimeout(() => ripple.remove(), 600);
-});
-
-// ── Responsive Loading State for Form Submissions ────────────────────────────
-document.addEventListener('submit', (e) => {
-    const btn = e.target.querySelector('button[type="submit"]');
-    if (btn) {
-        const originalText = btn.innerHTML;
-        btn.innerHTML = `
-            <span style="display:inline-flex;align-items:center;gap:8px">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="animation:spin 1s linear infinite">
-                    <circle cx="12" cy="12" r="10" stroke="#c084fc" opacity="0.25"/>
-                    <path d="M12 2a10 10 0 0 1 10 10" stroke="#f3e8ff"/>
+{% block content %}
+<div class="dashboard-hero">
+    <div class="hero-content">
+        <div class="hero-badge">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>
+            </svg>
+            AI-Powered ATS
+        </div>
+        <h1 class="hero-title">Build Resumes That Beat the ATS</h1>
+        <p class="hero-subtitle">Create tailored resumes, analyze your job match score, identify skill gaps, and prepare for interviews - all in one place.</p>
+        <div class="hero-actions">
+            <a href="{{ url_for('resume_builder') }}" class="btn btn-primary btn-lg">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
                 </svg>
-                Processing...
-            </span>
-        `;
-        btn.disabled = true;
+                Build Resume
+            </a>
+            <a href="{{ url_for('pdf_rebuilder') }}" class="btn btn-secondary btn-lg" style="background: rgba(147, 51, 234, 0.35); border: 1px solid rgba(192, 132, 252, 0.45); color: #f3e8ff;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                    <polyline points="14 2 14 8 20 8"/>
+                    <path d="M12 18v-6M9 15l3-3 3 3"/>
+                </svg>
+                PDF Style Rebuilder
+            </a>
+            <a href="{{ url_for('ats_analyzer') }}" class="btn btn-outline btn-lg">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+                Analyze ATS Score
+            </a>
+        </div>
+    </div>
+    <div class="hero-illustration">
+        <div class="hero-score-card">
+            <div class="score-ring-demo">
+                <svg width="120" height="120" viewBox="0 0 120 120">
+                    <circle cx="60" cy="60" r="50" fill="none" stroke="rgba(168, 85, 247, 0.2)" stroke-width="10"/>
+                    <circle cx="60" cy="60" r="50" fill="none" stroke="url(#scoreGradPurple)" stroke-width="10"
+                        stroke-dasharray="251" stroke-dashoffset="63" stroke-linecap="round"
+                        transform="rotate(-90 60 60)"/>
+                    <defs>
+                        <linearGradient id="scoreGradPurple" x1="0" y1="0" x2="1" y2="1">
+                            <stop offset="0%" stop-color="#9333ea"/>
+                            <stop offset="50%" stop-color="#c084fc"/>
+                            <stop offset="100%" stop-color="#e9d5ff"/>
+                        </linearGradient>
+                    </defs>
+                </svg>
+                <div class="score-ring-label">75%</div>
+            </div>
+            <div class="score-card-label">ATS Match Score</div>
+        </div>
+    </div>
+</div>
 
-        if (!document.getElementById('spinStyle')) {
-            const style = document.createElement('style');
-            style.id = 'spinStyle';
-            style.textContent = '@keyframes spin { to { transform: rotate(360deg); } }';
-            document.head.appendChild(style);
-        }
+<!-- Stats Row -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon stat-icon-purple">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+            </svg>
+        </div>
+        <div class="stat-info">
+            <div class="stat-value">{{ resumes|length }}</div>
+            <div class="stat-label">Resumes Created</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon stat-icon-blue">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+            </svg>
+        </div>
+        <div class="stat-info">
+            <div class="stat-value">{{ stats.total }}</div>
+            <div class="stat-label">Jobs Tracked</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon stat-icon-green">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+            </svg>
+        </div>
+        <div class="stat-info">
+            <div class="stat-value">{{ stats.by_status.get('Interview', 0) }}</div>
+            <div class="stat-label">Interviews</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon stat-icon-amber">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                <polyline points="22 4 12 14.01 9 11.01"/>
+            </svg>
+        </div>
+        <div class="stat-info">
+            <div class="stat-value">{{ stats.by_status.get('Offer', 0) }}</div>
+            <div class="stat-label">Offers Received</div>
+        </div>
+    </div>
+</div>
 
-        // Safety failsafe: re-enable button after 10s if network stalls
-        setTimeout(() => {
-            btn.innerHTML = originalText;
-            btn.disabled = false;
-        }, 10000);
+<!-- Feature Cards -->
+<div class="section-header">
+    <h2 class="section-title">All Features</h2>
+    <p class="section-sub">Everything you need to land your dream job</p>
+</div>
+
+<div class="feature-grid">
+    <a href="{{ url_for('pdf_rebuilder') }}" class="feature-card feature-card-rebuilder" style="border: 1px solid rgba(192, 132, 252, 0.45); background: linear-gradient(135deg, rgba(46, 16, 101, 0.6) 0%, rgba(20, 3, 40, 0.8) 100%);">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+            <div class="feature-icon" style="background: rgba(147, 51, 234, 0.25); border: 1px solid rgba(192, 132, 252, 0.35);">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                    <polyline points="14 2 14 8 20 8"/>
+                    <path d="M12 18v-6M9 15l3-3 3 3"/>
+                </svg>
+            </div>
+            <span class="badge" style="background: linear-gradient(135deg, #7c3aed, #c084fc); color: #fff; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 999px; text-transform: uppercase; letter-spacing: 0.5px;">New AI Tool</span>
+        </div>
+        <h3 style="color: #f5f3ff;">PDF Resume Rebuilder</h3>
+        <p>Upload any PDF/DOCX resume. AI detects sections and layout archetype to build a fresh, ATS-compliant PDF in the exact matching style!</p>
+        <div class="feature-arrow">&rarr;</div>
+    </a>
+    <a href="{{ url_for('resume_builder') }}" class="feature-card feature-card-1">
+        <div class="feature-icon">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+                <line x1="16" y1="13" x2="8" y2="13"/>
+                <line x1="16" y1="17" x2="8" y2="17"/>
+                <polyline points="10 9 9 9 8 9"/>
+            </svg>
+        </div>
+        <h3>Resume Builder</h3>
+        <p>Create structured resumes with education, experience, skills, and projects. Save and manage multiple resumes.</p>
+        <div class="feature-arrow">&rarr;</div>
+    </a>
+    <a href="{{ url_for('ats_analyzer') }}" class="feature-card feature-card-2">
+        <div class="feature-icon">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/>
+                <circle cx="12" cy="12" r="6"/>
+                <circle cx="12" cy="12" r="2"/>
+            </svg>
+        </div>
+        <h3>ATS Match Analyzer</h3>
+        <p>Paste a job description and instantly see your match score, matched skills, and missing skills.</p>
+        <div class="feature-arrow">&rarr;</div>
+    </a>
+    <a href="{{ url_for('ats_analyzer') }}" class="feature-card feature-card-3">
+        <div class="feature-icon">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"/>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                <line x1="11" y1="8" x2="11" y2="14"/>
+                <line x1="8" y1="11" x2="14" y2="11"/>
+            </svg>
+        </div>
+        <h3>Skill Gap Analyzer</h3>
+        <p>Discover exactly which skills you are missing with curated learning resources for each gap.</p>
+        <div class="feature-arrow">&rarr;</div>
+    </a>
+    <a href="{{ url_for('templates_page') }}" class="feature-card feature-card-4">
+        <div class="feature-icon">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                <path d="M3 9h18M9 21V9"/>
+            </svg>
+        </div>
+        <h3>Resume Templates</h3>
+        <p>Choose from Modern, Classic, or Minimal templates and download a professional PDF instantly.</p>
+        <div class="feature-arrow">&rarr;</div>
+    </a>
+    <a href="{{ url_for('interview_prep') }}" class="feature-card feature-card-5">
+        <div class="feature-icon">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
+        </div>
+        <h3>Interview Prep</h3>
+        <p>Generate HR, technical, and situational interview questions based on the job description.</p>
+        <div class="feature-arrow">&rarr;</div>
+    </a>
+    <a href="{{ url_for('tracker') }}" class="feature-card feature-card-6">
+        <div class="feature-icon">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 11l3 3L22 4"/>
+                <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+            </svg>
+        </div>
+        <h3>Job Tracker</h3>
+        <p>Track every application - company, role, status, dates, and notes in one organized place.</p>
+        <div class="feature-arrow">&rarr;</div>
+    </a>
+</div>
+
+<!-- Recent Resumes -->
+{% if resumes %}
+<div class="section-header">
+    <h2 class="section-title">Recent Resumes</h2>
+    <a href="{{ url_for('resume_builder') }}" class="btn btn-sm btn-outline">+ New Resume</a>
+</div>
+<div class="resume-list">
+    {% for r in resumes[:5] %}
+    <div class="resume-list-item">
+        <div class="resume-avatar">{{ r.full_name[0].upper() if r.full_name else '?' }}</div>
+        <div class="resume-info">
+            <div class="resume-name">{{ r.full_name or 'Unnamed Resume' }}</div>
+            <div class="resume-email">{{ r.email or '' }}</div>
+        </div>
+        <div class="resume-date">{{ r.created_at[:10] if r.created_at else '' }}</div>
+        <div class="resume-actions">
+            <a href="{{ url_for('view_resume', resume_id=r.id) }}" class="btn btn-sm btn-ghost">View</a>
+            <a href="{{ url_for('edit_resume', resume_id=r.id) }}" class="btn btn-sm btn-ghost">Edit</a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+{% endblock %}
+""",
+    'templates/pdf_rebuilder.html': r"""
+{% extends "base.html" %}
+{% block title %}PDF Resume Rebuilder{% endblock %}
+{% block page_title %}PDF Resume Style Rebuilder{% endblock %}
+
+{% block content %}
+<!-- Tool Header -->
+<div class="dashboard-hero" style="margin-bottom: 24px; padding: 32px 36px;">
+    <div class="hero-content">
+        <div class="hero-badge">AI Style Matcher &amp; PDF Cloner</div>
+        <h1 class="hero-title" style="font-size: 30px;">Clone &amp; Rebuild Your Resume in PDF</h1>
+        <p class="hero-subtitle" style="max-width: 620px; font-size: 14.5px;">
+            Upload your existing PDF or DOCX resume. Our AI automatically extracts every section, analyzes the formatting layout, and generates a fresh, perfectly aligned ATS-friendly PDF in matching style!
+        </p>
+    </div>
+    <div class="hero-illustration">
+        <div class="stat-card" style="background: rgba(45, 12, 95, 0.75); border: 1px solid var(--border-glow); padding: 18px 24px;">
+            <div class="stat-icon stat-icon-purple" style="width: 50px; height: 50px; font-size: 24px;">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                    <polyline points="14 2 14 8 20 8"/>
+                    <path d="M12 18v-6M9 15l3-3 3 3"/>
+                </svg>
+            </div>
+            <div>
+                <div class="stat-value" style="font-size: 22px;">100% Match</div>
+                <div class="stat-label">Style Preservation</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Step 1: Upload Existing Resume Card -->
+<div class="form-card" style="margin-bottom: 24px;">
+    <div class="form-card-header">
+        <div class="form-card-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="17 8 12 3 7 8"/>
+                <line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+        </div>
+        <div>
+            <h2 class="form-card-title">Step 1: Upload or Choose Resume</h2>
+            <p class="form-card-sub">Upload your PDF/Word resume to auto-parse its content and structure</p>
+        </div>
+    </div>
+
+    <form method="POST" enctype="multipart/form-data" action="{{ url_for('pdf_rebuilder') }}">
+        <div class="form-grid form-grid-2">
+            <!-- File Upload -->
+            <div>
+                <div class="upload-dropzone" onclick="document.getElementById('rebuilder_file').click()" style="padding: 30px 20px;">
+                    <div class="dropzone-icon">
+                        <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                            <polyline points="14 2 14 8 20 8"/>
+                            <line x1="12" y1="18" x2="12" y2="12"/>
+                            <polyline points="9 15 12 12 15 15"/>
+                        </svg>
+                    </div>
+                    <div class="dropzone-text" style="font-size: 14px;">Select PDF or DOCX Resume</div>
+                    <div class="dropzone-sub">Click here to browse your device files</div>
+                    <input type="file" id="rebuilder_file" name="resume_file" accept=".pdf,.docx" style="display:none" onchange="document.getElementById('fileNameDisplay').textContent = this.files[0] ? this.files[0].name : ''; document.getElementById('fileNameDisplay').style.display = 'block';">
+                    <div class="dropzone-filename" id="fileNameDisplay"></div>
+                </div>
+            </div>
+
+            <!-- Alternative: Paste Text or Pick Saved -->
+            <div style="display: flex; flex-direction: column; justify-content: space-between; gap: 12px;">
+                <div class="form-group">
+                    <label for="existing_resume">Or Pick from Saved Resumes</label>
+                    <select id="existing_resume" class="form-select" onchange="if(this.value) window.location.href='{{ url_for('pdf_rebuilder') }}?resume_id=' + this.value">
+                        <option value="">-- Choose saved resume --</option>
+                        {% for r in resume_list %}
+                        <option value="{{ r.id }}">{{ r.full_name }} ({{ r.created_at[:10] }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group" style="flex: 1;">
+                    <label for="resume_text">Or Paste Resume Content</label>
+                    <textarea id="resume_text" name="resume_text" class="form-textarea" rows="3" placeholder="Paste your resume text here if you don't have the PDF file handy..."></textarea>
+                </div>
+            </div>
+        </div>
+
+        <div style="margin-top: 18px; display: flex; justify-content: flex-end;">
+            <button type="submit" class="btn btn-primary btn-lg" style="width: auto;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"/>
+                    <polyline points="12 6 12 12 16 14"/>
+                </svg>
+                Auto-Parse &amp; Match Style
+            </button>
+        </div>
+    </form>
+</div>
+
+<!-- Step 2: Interactive Editor & Cloned PDF Generator -->
+{% if parsed %}
+<div class="section-header">
+    <div>
+        <h2 class="section-title">Step 2: Refine &amp; Generate Cloned PDF</h2>
+        <p class="section-sub">
+            Detected Style Archetype: <strong style="color: var(--purple-neon); text-transform: uppercase;">{{ parsed.detected_style }}</strong>
+            &nbsp;|&nbsp; Found Sections: <strong>{{ parsed.sections_found|join(', ')|title }}</strong>
+        </p>
+    </div>
+</div>
+
+<form method="POST" action="{{ url_for('export_rebuilt_pdf') }}" id="cloneExportForm">
+    <!-- Style Template Selector -->
+    <div class="form-card">
+        <div class="form-card-header">
+            <div class="form-card-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="18" height="18" rx="2"/>
+                    <path d="M3 9h18M9 21V9"/>
+                </svg>
+            </div>
+            <div>
+                <h3 class="form-card-title">Choose Output Visual Style</h3>
+                <p class="form-card-sub">Select the styling for your generated PDF</p>
+            </div>
+        </div>
+
+        <div class="template-cards" style="grid-template-columns: repeat(4, 1fr);">
+            <!-- Cloned Match -->
+            <div class="template-card {% if parsed.detected_style not in ['classic', 'minimal', 'executive'] %}active{% endif %}" onclick="selectRebuilderTemplate('cloned_style', this)">
+                <div class="template-preview modern-preview" style="height: 110px;">
+                    <div class="tpl-header-bar"></div>
+                    <div class="tpl-name-block"></div>
+                    <div class="tpl-line tpl-line-wide"></div>
+                </div>
+                <div class="template-card-info" style="padding: 10px 12px;">
+                    <div class="template-name" style="font-size: 13px;">Exact Cloned Match</div>
+                    <span class="template-badge tpl-badge-modern">Recommended</span>
+                </div>
+            </div>
+
+            <!-- Modern Purple -->
+            <div class="template-card {% if parsed.detected_style == 'modern' %}active{% endif %}" onclick="selectRebuilderTemplate('modern', this)">
+                <div class="template-preview modern-preview" style="height: 110px;">
+                    <div class="tpl-header-bar" style="background: linear-gradient(90deg, #9333ea, #c084fc);"></div>
+                    <div class="tpl-name-block"></div>
+                    <div class="tpl-line tpl-line-medium"></div>
+                </div>
+                <div class="template-card-info" style="padding: 10px 12px;">
+                    <div class="template-name" style="font-size: 13px;">Modern Purple</div>
+                    <span class="template-badge tpl-badge-modern">Tech Roles</span>
+                </div>
+            </div>
+
+            <!-- Executive Cloned -->
+            <div class="template-card {% if parsed.detected_style == 'executive' %}active{% endif %}" onclick="selectRebuilderTemplate('executive', this)">
+                <div class="template-preview classic-preview" style="height: 110px;">
+                    <div class="tpl-classic-header"></div>
+                    <div class="tpl-line tpl-line-wide"></div>
+                    <div class="tpl-classic-rule"></div>
+                </div>
+                <div class="template-card-info" style="padding: 10px 12px;">
+                    <div class="template-name" style="font-size: 13px;">Executive Plum</div>
+                    <span class="template-badge tpl-badge-classic">Leadership</span>
+                </div>
+            </div>
+
+            <!-- Minimal ATS -->
+            <div class="template-card {% if parsed.detected_style == 'minimal' %}active{% endif %}" onclick="selectRebuilderTemplate('minimal', this)">
+                <div class="template-preview minimal-preview" style="height: 110px;">
+                    <div class="tpl-min-name"></div>
+                    <div class="tpl-min-section"></div>
+                    <div class="tpl-line tpl-line-wide"></div>
+                </div>
+                <div class="template-card-info" style="padding: 10px 12px;">
+                    <div class="template-name" style="font-size: 13px;">Minimal ATS</div>
+                    <span class="template-badge tpl-badge-minimal">Clean ATS</span>
+                </div>
+            </div>
+        </div>
+        <input type="hidden" name="template_name" id="selectedTemplateInput" value="{{ parsed.detected_style if parsed.detected_style in ['modern', 'classic', 'minimal', 'executive'] else 'cloned_style' }}">
+    </div>
+
+    <!-- Personal Information -->
+    <div class="form-card">
+        <div class="form-card-header">
+            <div class="form-card-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                    <circle cx="12" cy="7" r="4"/>
+                </svg>
+            </div>
+            <div>
+                <h3 class="form-card-title">Personal Contact Info</h3>
+                <p class="form-card-sub">Parsed from your uploaded resume</p>
+            </div>
+        </div>
+
+        <div class="form-grid form-grid-3">
+            <div class="form-group">
+                <label>Full Name <span class="required">*</span></label>
+                <input type="text" name="full_name" class="form-input" value="{{ parsed.full_name }}" required>
+            </div>
+            <div class="form-group">
+                <label>Email Address <span class="required">*</span></label>
+                <input type="email" name="email" class="form-input" value="{{ parsed.email }}" required>
+            </div>
+            <div class="form-group">
+                <label>Phone Number</label>
+                <input type="text" name="phone" class="form-input" value="{{ parsed.phone }}">
+            </div>
+            <div class="form-group">
+                <label>Location</label>
+                <input type="text" name="location" class="form-input" value="{{ parsed.location }}">
+            </div>
+            <div class="form-group">
+                <label>LinkedIn URL</label>
+                <input type="url" name="linkedin" class="form-input" value="{{ parsed.linkedin }}">
+            </div>
+            <div class="form-group">
+                <label>GitHub / Portfolio URL</label>
+                <input type="url" name="portfolio" class="form-input" value="{{ parsed.portfolio }}">
+            </div>
+        </div>
+
+        <div class="form-group" style="margin-top: 14px;">
+            <label>Professional Summary</label>
+            <textarea name="summary" class="form-textarea" rows="3">{{ parsed.summary }}</textarea>
+        </div>
+    </div>
+
+    <!-- Skills -->
+    <div class="form-card">
+        <div class="form-card-header">
+            <div class="form-card-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+                </svg>
+            </div>
+            <div>
+                <h3 class="form-card-title">Skills &amp; Competencies</h3>
+                <p class="form-card-sub">Comma-separated skills extracted from your resume</p>
+            </div>
+        </div>
+        <div class="form-group">
+            <textarea name="skills" class="form-textarea" rows="3">{{ parsed.skills }}</textarea>
+        </div>
+    </div>
+
+    <!-- Experience -->
+    <div class="form-card">
+        <div class="form-card-header">
+            <div class="form-card-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
+                    <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+                </svg>
+            </div>
+            <div>
+                <h3 class="form-card-title">Work Experience</h3>
+                <p class="form-card-sub">Positions, company names, durations, and accomplishment bullets</p>
+            </div>
+        </div>
+
+        <div id="experienceList">
+            {% for exp in parsed.experience %}
+            <div class="dynamic-row" data-row="experience">
+                <div class="form-grid form-grid-3">
+                    <div class="form-group">
+                        <label>Job Title / Role</label>
+                        <input type="text" name="exp_role" class="form-input" value="{{ exp.role }}">
+                    </div>
+                    <div class="form-group">
+                        <label>Company</label>
+                        <input type="text" name="exp_company" class="form-input" value="{{ exp.company }}">
+                    </div>
+                    <div class="form-group">
+                        <label>Duration</label>
+                        <input type="text" name="exp_duration" class="form-input" value="{{ exp.duration }}">
+                    </div>
+                </div>
+                <div class="form-group" style="margin-top: 10px;">
+                    <label>Achievements &amp; Responsibilities</label>
+                    <textarea name="exp_description" class="form-textarea" rows="3">{{ exp.description }}</textarea>
+                </div>
+                <button type="button" class="btn-remove" onclick="this.closest('.dynamic-row').remove()">&times; Remove</button>
+            </div>
+            {% endfor %}
+        </div>
+        <button type="button" class="btn btn-ghost btn-sm" onclick="addExperienceRow()">+ Add Experience</button>
+    </div>
+
+    <!-- Education -->
+    <div class="form-card">
+        <div class="form-card-header">
+            <div class="form-card-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+                    <path d="M6 12v5c3 3 9 3 12 0v-5"/>
+                </svg>
+            </div>
+            <div>
+                <h3 class="form-card-title">Education</h3>
+                <p class="form-card-sub">Academic degrees and qualifications</p>
+            </div>
+        </div>
+
+        <div id="educationList">
+            {% for edu in parsed.education %}
+            <div class="dynamic-row" data-row="education">
+                <div class="form-grid form-grid-4">
+                    <div class="form-group">
+                        <label>Degree</label>
+                        <input type="text" name="edu_degree" class="form-input" value="{{ edu.degree }}">
+                    </div>
+                    <div class="form-group">
+                        <label>Institution</label>
+                        <input type="text" name="edu_institution" class="form-input" value="{{ edu.institution }}">
+                    </div>
+                    <div class="form-group">
+                        <label>Year</label>
+                        <input type="text" name="edu_year" class="form-input" value="{{ edu.year }}">
+                    </div>
+                    <div class="form-group">
+                        <label>Grade / CGPA</label>
+                        <input type="text" name="edu_grade" class="form-input" value="{{ edu.grade }}">
+                    </div>
+                </div>
+                <button type="button" class="btn-remove" onclick="this.closest('.dynamic-row').remove()">&times; Remove</button>
+            </div>
+            {% endfor %}
+        </div>
+        <button type="button" class="btn btn-ghost btn-sm" onclick="addEducationRow()">+ Add Education</button>
+    </div>
+
+    <!-- Projects -->
+    <div class="form-card">
+        <div class="form-card-header">
+            <div class="form-card-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/>
+                    <path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/>
+                </svg>
+            </div>
+            <div>
+                <h3 class="form-card-title">Projects</h3>
+                <p class="form-card-sub">Key projects mentioned in your resume</p>
+            </div>
+        </div>
+
+        <div id="projectList">
+            {% for proj in parsed.projects %}
+            <div class="dynamic-row" data-row="project">
+                <div class="form-grid form-grid-2">
+                    <div class="form-group">
+                        <label>Project Title</label>
+                        <input type="text" name="proj_title" class="form-input" value="{{ proj.title }}">
+                    </div>
+                    <div class="form-group">
+                        <label>Technologies</label>
+                        <input type="text" name="proj_tech" class="form-input" value="{{ proj.tech }}">
+                    </div>
+                </div>
+                <div class="form-group" style="margin-top: 10px;">
+                    <label>Description</label>
+                    <textarea name="proj_description" class="form-textarea" rows="2">{{ proj.description }}</textarea>
+                </div>
+                <button type="button" class="btn-remove" onclick="this.closest('.dynamic-row').remove()">&times; Remove</button>
+            </div>
+            {% endfor %}
+        </div>
+        <button type="button" class="btn btn-ghost btn-sm" onclick="addProjectRow()">+ Add Project</button>
+    </div>
+
+    <!-- Certifications -->
+    <div class="form-card">
+        <div class="form-card-header">
+            <div class="form-card-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="8" r="7"/>
+                    <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/>
+                </svg>
+            </div>
+            <div>
+                <h3 class="form-card-title">Certifications &amp; Awards</h3>
+                <p class="form-card-sub">One per line</p>
+            </div>
+        </div>
+        <div class="form-group">
+            <textarea name="certifications" class="form-textarea" rows="3">{{ parsed.certifications }}</textarea>
+        </div>
+    </div>
+
+    <!-- Action Bar -->
+    <div class="form-actions" style="justify-content: space-between; align-items: center;">
+        <label style="display: flex; align-items: center; gap: 8px; font-size: 13.5px; color: var(--purple-pale); cursor: pointer;">
+            <input type="checkbox" name="save_to_db" value="1" checked style="accent-color: var(--purple-bright); width: 16px; height: 16px;">
+            Save this rebuilt resume to my dashboard resumes
+        </label>
+
+        <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+            <a href="{{ url_for('dashboard') }}" class="btn btn-ghost">Cancel</a>
+            <button type="submit" class="btn btn-primary btn-lg">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="7 10 12 15 17 10"/>
+                    <line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+                Download Cloned PDF Resume
+            </button>
+        </div>
+    </div>
+</form>
+{% endif %}
+
+<script>
+function selectRebuilderTemplate(tplId, cardEl) {
+    document.querySelectorAll('.template-card').forEach(c => c.classList.remove('active'));
+    cardEl.classList.add('active');
+    document.getElementById('selectedTemplateInput').value = tplId;
+}
+
+function addExperienceRow() {
+    const list = document.getElementById('experienceList');
+    const div = document.createElement('div');
+    div.className = 'dynamic-row';
+    div.innerHTML = `
+        <div class="form-grid form-grid-3">
+            <div class="form-group"><label>Job Title / Role</label><input type="text" name="exp_role" class="form-input" placeholder="e.g. QA Engineer"></div>
+            <div class="form-group"><label>Company</label><input type="text" name="exp_company" class="form-input" placeholder="e.g. Tech Corp"></div>
+            <div class="form-group"><label>Duration</label><input type="text" name="exp_duration" class="form-input" placeholder="2022 - Present"></div>
+        </div>
+        <div class="form-group" style="margin-top:10px;"><label>Achievements &amp; Responsibilities</label><textarea name="exp_description" class="form-textarea" rows="2" placeholder="Responsibilities..."></textarea></div>
+        <button type="button" class="btn-remove" onclick="this.closest('.dynamic-row').remove()">&times; Remove</button>
+    `;
+    list.appendChild(div);
+}
+
+function addEducationRow() {
+    const list = document.getElementById('educationList');
+    const div = document.createElement('div');
+    div.className = 'dynamic-row';
+    div.innerHTML = `
+        <div class="form-grid form-grid-4">
+            <div class="form-group"><label>Degree</label><input type="text" name="edu_degree" class="form-input" placeholder="e.g. MCA"></div>
+            <div class="form-group"><label>Institution</label><input type="text" name="edu_institution" class="form-input" placeholder="University"></div>
+            <div class="form-group"><label>Year</label><input type="text" name="edu_year" class="form-input" placeholder="2022 - 2024"></div>
+            <div class="form-group"><label>Grade / CGPA</label><input type="text" name="edu_grade" class="form-input" placeholder="8.5 CGPA"></div>
+        </div>
+        <button type="button" class="btn-remove" onclick="this.closest('.dynamic-row').remove()">&times; Remove</button>
+    `;
+    list.appendChild(div);
+}
+
+function addProjectRow() {
+    const list = document.getElementById('projectList');
+    const div = document.createElement('div');
+    div.className = 'dynamic-row';
+    div.innerHTML = `
+        <div class="form-grid form-grid-2">
+            <div class="form-group"><label>Project Title</label><input type="text" name="proj_title" class="form-input" placeholder="Project Name"></div>
+            <div class="form-group"><label>Technologies</label><input type="text" name="proj_tech" class="form-input" placeholder="Python, SQL, etc."></div>
+        </div>
+        <div class="form-group" style="margin-top:10px;"><label>Description</label><textarea name="proj_description" class="form-textarea" rows="2" placeholder="Project details..."></textarea></div>
+        <button type="button" class="btn-remove" onclick="this.closest('.dynamic-row').remove()">&times; Remove</button>
+    `;
+    list.appendChild(div);
+}
+</script>
+{% endblock %}
+""",
+    'templates/ats_analyzer.html': r"""
+{% extends "base.html" %}
+{% block title %}ATS Analyzer{% endblock %}
+{% block page_title %}ATS Match Analyzer{% endblock %}
+
+{% block content %}
+<div class="ats-layout">
+    <!-- Input Panel -->
+    <div class="ats-input-panel">
+        <div class="form-card">
+            <div class="form-card-header">
+                <div class="form-card-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"/>
+                        <circle cx="12" cy="12" r="6"/>
+                        <circle cx="12" cy="12" r="2"/>
+                    </svg>
+                </div>
+                <div>
+                    <h2 class="form-card-title">Analyze Your Resume</h2>
+                    <p class="form-card-sub">Compare your resume against a job description</p>
+                </div>
+            </div>
+
+            <form method="POST" id="atsForm">
+                <!-- Resume Source Toggle -->
+                <div class="toggle-group">
+                    <button type="button" class="toggle-btn active" id="btnPaste" onclick="switchMode('paste')">Paste Text</button>
+                    <button type="button" class="toggle-btn" id="btnSaved" onclick="switchMode('saved')">Use Saved Resume</button>
+                </div>
+
+                <!-- Paste Mode -->
+                <div id="pasteMode">
+                    <div class="form-group">
+                        <label for="resume_text">Your Resume Text</label>
+                        <textarea id="resume_text" name="resume_text" class="form-textarea" rows="8"
+                            placeholder="Paste your full resume text here...&#10;&#10;Example:&#10;Software Tester with 2 years of experience in manual testing, Selenium, Java, SQL, and API testing. Proficient in Jira, Agile methodology, and functional testing. Experience with Python scripting for test automation."></textarea>
+                    </div>
+                </div>
+
+                <!-- Saved Resume Mode -->
+                <div id="savedMode" style="display:none;">
+                    <div class="form-group">
+                        <label for="resume_id">Select a Saved Resume</label>
+                        <select id="resume_id" name="resume_id" class="form-select">
+                            <option value="">-- Select Resume --</option>
+                            {% for r in resume_list %}
+                            <option value="{{ r.id }}">{{ r.full_name }} ({{ r.email }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="job_description">Job Description <span class="required">*</span></label>
+                    <textarea id="job_description" name="job_description" class="form-textarea" rows="10"
+                        placeholder="Paste the complete job description here...&#10;&#10;Example:&#10;We are looking for a Software Test Engineer with experience in manual testing, Selenium, Java, SQL, Python, API testing, and JIRA. The candidate should have knowledge of Agile methodology and regression testing." required></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-lg w-full" id="analyzeBtn">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                    </svg>
+                    Analyze ATS Match
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Results Panel -->
+    <div class="ats-results-panel">
+        {% if result %}
+            {% if result.error %}
+            <div class="alert alert-warning">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                    <line x1="12" y1="9" x2="12" y2="13"/>
+                    <line x1="12" y1="17" x2="12.01" y2="17"/>
+                </svg>
+                <span>{{ result.error }}</span>
+            </div>
+            {% else %}
+            <!-- Score Card -->
+            <div class="score-card-main">
+                <div class="score-label">ATS Match Score</div>
+                <div class="score-ring-container" id="scoreRingContainer">
+                    <svg class="score-ring" width="160" height="160" viewBox="0 0 160 160">
+                        <defs>
+                            <linearGradient id="purpleRingGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#9333ea"/>
+                                <stop offset="60%" stop-color="#c084fc"/>
+                                <stop offset="100%" stop-color="#f3e8ff"/>
+                            </linearGradient>
+                            <filter id="purpleRingGlow" x="-20%" y="-20%" width="140%" height="140%">
+                                <feDropShadow dx="0" dy="0" stdDeviation="4" flood-color="#a855f7" flood-opacity="0.6"/>
+                            </filter>
+                        </defs>
+                        <circle cx="80" cy="80" r="66" fill="none" stroke="rgba(168, 85, 247, 0.2)" stroke-width="12"/>
+                        <circle cx="80" cy="80" r="66" fill="none"
+                            stroke="url(#purpleRingGrad)"
+                            stroke-width="12"
+                            filter="url(#purpleRingGlow)"
+                            stroke-dasharray="{{ (result.score / 100 * 414.69)|round|int }} 414"
+                            stroke-linecap="round"
+                            transform="rotate(-90 80 80)"
+                            class="score-circle"
+                            id="scoreCircle"/>
+                    </svg>
+                    <div class="score-ring-center">
+                        <div class="score-number" id="scoreNumber">{{ result.score }}%</div>
+                        <div class="score-status {{ 'good' if result.score >= 70 else 'ok' if result.score >= 40 else 'low' }}">
+                            {{ 'Excellent' if result.score >= 70 else 'Good' if result.score >= 40 else 'Low' }}
+                        </div>
+                    </div>
+                </div>
+                <div class="score-meta">
+                    Matched <strong>{{ result.matched|length }}</strong> of <strong>{{ result.jd_skills|length }}</strong> skills
+                    &nbsp;|&nbsp; Keyword Density: <strong>{{ result.keyword_density }}%</strong>
+                </div>
+            </div>
+
+            <!-- Tips -->
+            {% if result.tips %}
+            <div class="tips-card">
+                <h3 class="tips-title">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 6px;">
+                        <line x1="9" y1="18" x2="15" y2="18"/><line x1="10" y1="22" x2="14" y2="22"/>
+                        <path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"/>
+                    </svg>
+                    Improvement Tips
+                </h3>
+                <ul class="tips-list">
+                    {% for tip in result.tips %}
+                    <li>{{ tip }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+
+            <!-- Matched Skills -->
+            <div class="skills-section">
+                <h3 class="skills-section-title skills-matched-title">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align: middle; margin-right: 4px;">
+                        <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                    Matched Skills ({{ result.matched|length }})
+                </h3>
+                <div class="skills-cloud">
+                    {% for skill, cat in result.matched.items() %}
+                    <span class="skill-badge skill-matched" title="{{ cat.replace('_',' ').title() }}">{{ skill }}</span>
+                    {% endfor %}
+                    {% if not result.matched %}
+                    <span class="skills-empty">No matched skills found</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Missing Skills -->
+            <div class="skills-section">
+                <h3 class="skills-section-title skills-missing-title">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align: middle; margin-right: 4px;">
+                        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                    Missing Skills ({{ result.missing|length }})
+                </h3>
+                <div class="skills-cloud">
+                    {% for skill, cat in result.missing.items() %}
+                    <span class="skill-badge skill-missing" title="{{ cat.replace('_',' ').title() }}">{{ skill }}</span>
+                    {% endfor %}
+                    {% if not result.missing %}
+                    <span class="skills-empty">All required skills matched!</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Skill Gap Analysis with Resources -->
+            {% if result.gap_analysis %}
+            <div class="gap-card">
+                <h3 class="gap-title">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 6px;">
+                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+                    </svg>
+                    Skill Gap - Learning Resources
+                </h3>
+                <div class="gap-list">
+                    {% for gap in result.gap_analysis %}
+                    <div class="gap-item">
+                        <div class="gap-item-info">
+                            <span class="gap-skill">{{ gap.skill }}</span>
+                            <span class="gap-category">{{ gap.category }}</span>
+                        </div>
+                        <a href="{{ gap.resource }}" target="_blank" rel="noopener" class="btn btn-sm btn-outline">Learn &rarr;</a>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Actions -->
+            <div class="ats-actions">
+                <a href="{{ url_for('interview_prep') }}" class="btn btn-primary">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 6px;">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                    </svg>
+                    Generate Interview Questions
+                </a>
+                <a href="{{ url_for('templates_page') }}" class="btn btn-outline">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 6px;">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14 2 14 8 20 8"/>
+                    </svg>
+                    Download Resume PDF
+                </a>
+            </div>
+            {% endif %}
+        {% else %}
+        <!-- Placeholder when no result -->
+        <div class="ats-placeholder">
+            <div class="placeholder-icon">
+                <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"/>
+                    <circle cx="12" cy="12" r="6"/>
+                    <circle cx="12" cy="12" r="2"/>
+                </svg>
+            </div>
+            <h3>Ready to Analyze</h3>
+            <p>Paste your resume text and a job description, then click <strong>Analyze ATS Match</strong> to see your score, matched skills, missing skills, and personalized improvement tips.</p>
+            <div class="placeholder-steps">
+                <div class="p-step"><span class="p-step-num">1</span> Paste resume or select saved</div>
+                <div class="p-step"><span class="p-step-num">2</span> Paste job description</div>
+                <div class="p-step"><span class="p-step-num">3</span> See your ATS match score</div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function switchMode(mode) {
+    document.getElementById('pasteMode').style.display = mode === 'paste' ? 'block' : 'none';
+    document.getElementById('savedMode').style.display = mode === 'saved' ? 'block' : 'none';
+    document.getElementById('resume_id').disabled = mode === 'paste';
+    document.getElementById('resume_text').disabled = mode === 'saved';
+    document.getElementById('btnPaste').classList.toggle('active', mode === 'paste');
+    document.getElementById('btnSaved').classList.toggle('active', mode === 'saved');
+}
+
+// Animate score ring on load
+window.addEventListener('load', () => {
+    const circle = document.getElementById('scoreCircle');
+    if (circle) {
+        circle.style.transition = 'stroke-dasharray 1.5s ease-in-out';
     }
 });
+</script>
+{% endblock %}
 """,
-    'templates/view_resume.html': r"""{% extends "base.html" %}
+    'templates/interview_prep.html': r"""
+{% extends "base.html" %}
+{% block title %}Interview Preparation{% endblock %}
+{% block page_title %}Interview Question Generator{% endblock %}
+
+{% block content %}
+<div class="interview-layout">
+    <!-- Input Panel -->
+    <div class="interview-input">
+        <div class="form-card">
+            <div class="form-card-header">
+                <div class="form-card-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h2 class="form-card-title">Generate Questions</h2>
+                    <p class="form-card-sub">AI-powered from your job description</p>
+                </div>
+            </div>
+            <form method="POST">
+                <div class="form-group">
+                    <label for="resume_id">Reference Resume (optional)</label>
+                    <select id="resume_id" name="resume_id" class="form-select">
+                        <option value="">-- None --</option>
+                        {% for r in resume_list %}
+                        <option value="{{ r.id }}">{{ r.full_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="job_description">Job Description <span class="required">*</span></label>
+                    <textarea id="job_description" name="job_description" class="form-textarea" rows="12"
+                        placeholder="Paste the job description here...&#10;&#10;The more detailed, the more relevant questions you'll get!" required>{{ request.form.get('job_description', '') }}</textarea>
+                </div>
+                <button type="submit" class="btn btn-primary btn-lg w-full">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                    </svg>
+                    Generate Questions
+                </button>
+            </form>
+
+            {% if not questions %}
+            <div class="interview-tips-box">
+                <h4>Pro Tips:</h4>
+                <ol>
+                    <li>Paste the job description</li>
+                    <li>Get HR, technical &amp; situational questions</li>
+                    <li>Expand each question to see a model answer</li>
+                    <li>Practice out loud before your interview!</li>
+                </ol>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Questions Panel -->
+    <div class="interview-questions">
+        {% if questions %}
+        <div class="questions-header">
+            <div class="questions-count-chips">
+                <span class="count-chip chip-hr">{{ questions.hr|length }} HR</span>
+                <span class="count-chip chip-tech">{{ questions.technical|length }} Technical</span>
+                <span class="count-chip chip-sit">{{ questions.situational|length }} Situational</span>
+            </div>
+            {% if questions.role_hints %}
+            <div class="role-hints">
+                Role detected: {% for r in questions.role_hints %}<span class="role-tag">{{ r }}</span>{% endfor %}
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Technical Questions -->
+        <div class="q-section">
+            <h3 class="q-section-title">
+                <span class="q-section-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+                    </svg>
+                </span>
+                Technical Questions
+                <span class="q-count">{{ questions.technical|length }}</span>
+            </h3>
+            <div class="q-list">
+                {% for q in questions.technical %}
+                <div class="q-item" onclick="toggleAnswer(this)">
+                    <div class="q-header">
+                        <div class="q-skill-tag">{{ q.skill }}</div>
+                        <div class="q-text">{{ q.question }}</div>
+                        <div class="q-toggle">+</div>
+                    </div>
+                    <div class="q-answer">
+                        <div class="q-answer-label">Model Answer</div>
+                        <p>{{ q.answer }}</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- HR Questions -->
+        <div class="q-section">
+            <h3 class="q-section-title">
+                <span class="q-section-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                        <circle cx="12" cy="7" r="4"/>
+                    </svg>
+                </span>
+                HR &amp; Behavioral Questions
+                <span class="q-count">{{ questions.hr|length }}</span>
+            </h3>
+            <div class="q-list">
+                {% for q, a in questions.hr %}
+                <div class="q-item" onclick="toggleAnswer(this)">
+                    <div class="q-header">
+                        <div class="q-skill-tag">HR</div>
+                        <div class="q-text">{{ q }}</div>
+                        <div class="q-toggle">+</div>
+                    </div>
+                    <div class="q-answer">
+                        <div class="q-answer-label">How to Answer</div>
+                        <p>{{ a }}</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Situational Questions -->
+        <div class="q-section">
+            <h3 class="q-section-title">
+                <span class="q-section-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="18" height="18" rx="2"/>
+                        <line x1="3" y1="9" x2="21" y2="9"/>
+                        <line x1="9" y1="21" x2="9" y2="9"/>
+                    </svg>
+                </span>
+                Situational Questions
+                <span class="q-count">{{ questions.situational|length }}</span>
+            </h3>
+            <div class="q-list">
+                {% for q, a in questions.situational %}
+                <div class="q-item" onclick="toggleAnswer(this)">
+                    <div class="q-header">
+                        <div class="q-skill-tag">Situational</div>
+                        <div class="q-text">{{ q }}</div>
+                        <div class="q-toggle">+</div>
+                    </div>
+                    <div class="q-answer">
+                        <div class="q-answer-label">How to Approach</div>
+                        <p>{{ a }}</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="interview-actions">
+            <button onclick="expandAll()" class="btn btn-ghost btn-sm">Expand All Answers</button>
+            <button onclick="collapseAll()" class="btn btn-ghost btn-sm">Collapse All</button>
+        </div>
+
+        {% else %}
+        <!-- Placeholder -->
+        <div class="ats-placeholder">
+            <div class="placeholder-icon">
+                <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"/>
+                    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                    <line x1="12" y1="17" x2="12.01" y2="17"/>
+                </svg>
+            </div>
+            <h3>Questions will appear here</h3>
+            <p>Paste a job description and click <strong>Generate Questions</strong> to get personalized interview questions organized by category, with model answers to help you practice.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function toggleAnswer(item) {
+    item.classList.toggle('open');
+    const toggle = item.querySelector('.q-toggle');
+    toggle.textContent = item.classList.contains('open') ? '-' : '+';
+}
+
+function expandAll() {
+    document.querySelectorAll('.q-item').forEach(item => {
+        item.classList.add('open');
+        item.querySelector('.q-toggle').textContent = '-';
+    });
+}
+
+function collapseAll() {
+    document.querySelectorAll('.q-item').forEach(item => {
+        item.classList.remove('open');
+        item.querySelector('.q-toggle').textContent = '+';
+    });
+}
+</script>
+{% endblock %}
+""",
+    'templates/tracker.html': r"""
+{% extends "base.html" %}
+{% block title %}Job Application Tracker{% endblock %}
+{% block page_title %}Job Application Tracker{% endblock %}
+
+{% block content %}
+<!-- Stats Row -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon stat-icon-purple">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                <polyline points="22,6 12,13 2,6"/>
+            </svg>
+        </div>
+        <div class="stat-info">
+            <div class="stat-value">{{ stats.total }}</div>
+            <div class="stat-label">Total Applied</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon stat-icon-blue">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                <line x1="16" y1="2" x2="16" y2="6"/>
+                <line x1="8" y1="2" x2="8" y2="6"/>
+                <line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
+        </div>
+        <div class="stat-info">
+            <div class="stat-value">{{ stats.by_status.get('Interview', 0) }}</div>
+            <div class="stat-label">Interviews</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon stat-icon-green">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                <polyline points="22 4 12 14.01 9 11.01"/>
+            </svg>
+        </div>
+        <div class="stat-info">
+            <div class="stat-value">{{ stats.by_status.get('Offer', 0) }}</div>
+            <div class="stat-label">Offers</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon stat-icon-red">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="15" y1="9" x2="9" y2="15"/>
+                <line x1="9" y1="9" x2="15" y2="15"/>
+            </svg>
+        </div>
+        <div class="stat-info">
+            <div class="stat-value">{{ stats.by_status.get('Rejected', 0) }}</div>
+            <div class="stat-label">Rejected</div>
+        </div>
+    </div>
+</div>
+
+<div class="tracker-layout">
+    <!-- Add Application Form -->
+    <div class="tracker-form-panel">
+        <div class="form-card">
+            <div class="form-card-header">
+                <div class="form-card-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="5" x2="12" y2="19"/>
+                        <line x1="5" y1="12" x2="19" y2="12"/>
+                    </svg>
+                </div>
+                <div>
+                    <h2 class="form-card-title">Add Application</h2>
+                    <p class="form-card-sub">Track a new job application</p>
+                </div>
+            </div>
+            <form method="POST" action="{{ url_for('add_application') }}" id="addAppForm">
+                <div class="form-group">
+                    <label for="company">Company Name <span class="required">*</span></label>
+                    <input type="text" id="company" name="company" class="form-input" placeholder="e.g., TCS, Infosys, Google" required>
+                </div>
+                <div class="form-group">
+                    <label for="role">Job Role <span class="required">*</span></label>
+                    <input type="text" id="role" name="role" class="form-input" placeholder="e.g., Software Test Engineer" required>
+                </div>
+                <div class="form-grid form-grid-2">
+                    <div class="form-group">
+                        <label for="date_applied">Date Applied</label>
+                        <input type="date" id="date_applied" name="date_applied" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label for="status">Status</label>
+                        <select id="status" name="status" class="form-select">
+                            <option value="Applied">Applied</option>
+                            <option value="Interview">Interview</option>
+                            <option value="Offer">Offer</option>
+                            <option value="Rejected">Rejected</option>
+                            <option value="Withdrawn">Withdrawn</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-grid form-grid-2">
+                    <div class="form-group">
+                        <label for="location">Location</label>
+                        <input type="text" id="location" name="location" class="form-input" placeholder="Chennai / Remote">
+                    </div>
+                    <div class="form-group">
+                        <label for="salary">Salary (LPA)</label>
+                        <input type="text" id="salary" name="salary" class="form-input" placeholder="e.g., 6 LPA">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="job_url">Job URL</label>
+                    <input type="url" id="job_url" name="job_url" class="form-input" placeholder="https://...">
+                </div>
+                <div class="form-group">
+                    <label for="notes">Notes</label>
+                    <textarea id="notes" name="notes" class="form-textarea" rows="3" placeholder="Referral, recruiter name, follow-up date..."></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary w-full">Add Application</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Applications Table -->
+    <div class="tracker-table-panel">
+        <!-- Filters -->
+        <div class="tracker-filters">
+            <input type="text" id="filterSearch" class="form-input" placeholder="Search company or role..." oninput="filterTable()">
+            <select id="filterStatus" class="form-select" onchange="filterTable()">
+                <option value="">All Statuses</option>
+                <option value="Applied">Applied</option>
+                <option value="Interview">Interview</option>
+                <option value="Offer">Offer</option>
+                <option value="Rejected">Rejected</option>
+                <option value="Withdrawn">Withdrawn</option>
+            </select>
+        </div>
+
+        {% if applications %}
+        <div class="tracker-table-wrapper">
+            <table class="tracker-table" id="appTable">
+                <thead>
+                    <tr>
+                        <th>Company</th>
+                        <th>Role</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                        <th>Location</th>
+                        <th>Notes</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for app in applications %}
+                    <tr class="app-row" data-company="{{ app.company|lower }}" data-role="{{ app.role|lower }}" data-status="{{ app.status }}">
+                        <td class="app-company">
+                            <div class="company-avatar">{{ app.company[0].upper() }}</div>
+                            <div>
+                                <div class="company-name">{{ app.company }}</div>
+                                {% if app.job_url %}<a href="{{ app.job_url }}" target="_blank" class="job-link">View Job &nearr;</a>{% endif %}
+                            </div>
+                        </td>
+                        <td class="app-role">{{ app.role }}</td>
+                        <td>{{ app.date_applied or '-' }}</td>
+                        <td>
+                            <span class="status-badge status-{{ app.status|lower }}">
+                                {{ app.status }}
+                            </span>
+                        </td>
+                        <td>{{ app.location or '-' }}</td>
+                        <td class="app-notes">{{ app.notes or '-' }}</td>
+                        <td class="app-actions">
+                            <button class="btn btn-sm btn-ghost" onclick="openEditModal({{ app.id }}, '{{ app.company }}', '{{ app.role }}', '{{ app.date_applied }}', '{{ app.status }}', '{{ app.location }}', '{{ app.salary }}', '{{ app.job_url }}', {{ ('`' + app.notes + '`') if app.notes else 'null' }})">Edit</button>
+                            <form method="POST" action="{{ url_for('delete_application', app_id=app.id) }}" style="display:inline" onsubmit="return confirm('Delete this application?')">
+                                <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="ats-placeholder">
+            <div class="placeholder-icon">
+                <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+                    <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
+                </svg>
+            </div>
+            <h3>No Applications Yet</h3>
+            <p>Add your first job application using the form on the left. Track every company you apply to and monitor your progress.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Edit Modal -->
+<div class="modal-overlay" id="editModal">
+    <div class="modal">
+        <div class="modal-header">
+            <h3>Edit Application</h3>
+            <button onclick="closeEditModal()" class="modal-close">&times;</button>
+        </div>
+        <form method="POST" id="editForm">
+            <div class="form-grid form-grid-2">
+                <div class="form-group">
+                    <label>Company</label>
+                    <input type="text" name="company" id="edit_company" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label>Role</label>
+                    <input type="text" name="role" id="edit_role" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label>Date Applied</label>
+                    <input type="date" name="date_applied" id="edit_date" class="form-input">
+                </div>
+                <div class="form-group">
+                    <label>Status</label>
+                    <select name="status" id="edit_status" class="form-select">
+                        <option value="Applied">Applied</option>
+                        <option value="Interview">Interview</option>
+                        <option value="Offer">Offer</option>
+                        <option value="Rejected">Rejected</option>
+                        <option value="Withdrawn">Withdrawn</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Location</label>
+                    <input type="text" name="location" id="edit_location" class="form-input">
+                </div>
+                <div class="form-group">
+                    <label>Salary</label>
+                    <input type="text" name="salary" id="edit_salary" class="form-input">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Job URL</label>
+                <input type="url" name="job_url" id="edit_job_url" class="form-input">
+            </div>
+            <div class="form-group">
+                <label>Notes</label>
+                <textarea name="notes" id="edit_notes" class="form-textarea" rows="3"></textarea>
+            </div>
+            <div class="modal-actions">
+                <button type="button" onclick="closeEditModal()" class="btn btn-ghost">Cancel</button>
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/tracker.js') }}"></script>
+{% endblock %}
+""",
+    'templates/templates_page.html': r"""
+{% extends "base.html" %}
+{% block title %}Resume Templates{% endblock %}
+{% block page_title %}Resume Templates & PDF Download{% endblock %}
+
+{% block content %}
+<div class="templates-layout">
+    <!-- Template Selector -->
+    <div class="templates-grid-panel">
+        <div class="section-header">
+            <h2 class="section-title">Choose a Template</h2>
+            <p class="section-sub">Select a professional template that suits your target role</p>
+        </div>
+
+        <div class="template-cards">
+            <!-- Modern Template -->
+            <div class="template-card" id="tpl-modern" onclick="selectTemplate('modern')">
+                <div class="template-preview modern-preview">
+                    <div class="tpl-header-bar"></div>
+                    <div class="tpl-name-block"></div>
+                    <div class="tpl-line tpl-line-wide"></div>
+                    <div class="tpl-line tpl-line-medium"></div>
+                    <div class="tpl-divider"></div>
+                    <div class="tpl-line"></div>
+                    <div class="tpl-line tpl-line-wide"></div>
+                    <div class="tpl-line"></div>
+                    <div class="tpl-line tpl-line-medium"></div>
+                </div>
+                <div class="template-card-info">
+                    <div class="template-name">Modern</div>
+                    <div class="template-desc">Clean layout with royal purple header. High ATS ranking.</div>
+                    <span class="template-badge tpl-badge-modern">Popular</span>
+                </div>
+                <div class="template-check" id="check-modern"></div>
+            </div>
+
+            <!-- Classic Template -->
+            <div class="template-card" id="tpl-classic" onclick="selectTemplate('classic')">
+                <div class="template-preview classic-preview">
+                    <div class="tpl-classic-header"></div>
+                    <div class="tpl-line tpl-line-wide"></div>
+                    <div class="tpl-line"></div>
+                    <div class="tpl-classic-rule"></div>
+                    <div class="tpl-line tpl-line-wide"></div>
+                    <div class="tpl-line tpl-line-medium"></div>
+                    <div class="tpl-classic-rule"></div>
+                    <div class="tpl-line"></div>
+                    <div class="tpl-line tpl-line-wide"></div>
+                </div>
+                <div class="template-card-info">
+                    <div class="template-name">Classic</div>
+                    <div class="template-desc">Traditional single-column format. Ideal for formal industries.</div>
+                    <span class="template-badge tpl-badge-classic">Professional</span>
+                </div>
+                <div class="template-check" id="check-classic"></div>
+            </div>
+
+            <!-- Minimal Template -->
+            <div class="template-card" id="tpl-minimal" onclick="selectTemplate('minimal')">
+                <div class="template-preview minimal-preview">
+                    <div class="tpl-min-name"></div>
+                    <div class="tpl-line tpl-line-medium"></div>
+                    <div style="height:8px"></div>
+                    <div class="tpl-min-section"></div>
+                    <div class="tpl-line tpl-line-wide"></div>
+                    <div class="tpl-line"></div>
+                    <div class="tpl-min-section"></div>
+                    <div class="tpl-line tpl-line-wide"></div>
+                    <div class="tpl-line tpl-line-medium"></div>
+                </div>
+                <div class="template-card-info">
+                    <div class="template-name">Minimal</div>
+                    <div class="template-desc">Ultra-clean minimalist design. Modern and ATS-friendly.</div>
+                    <span class="template-badge tpl-badge-minimal">ATS-Friendly</span>
+                </div>
+                <div class="template-check" id="check-minimal"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Download Panel -->
+    <div class="download-panel">
+        <div class="form-card">
+            <div class="form-card-header">
+                <div class="form-card-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14 2 14 8 20 8"/>
+                        <line x1="16" y1="13" x2="8" y2="13"/>
+                        <line x1="16" y1="17" x2="8" y2="17"/>
+                    </svg>
+                </div>
+                <div>
+                    <h2 class="form-card-title">Generate PDF</h2>
+                    <p class="form-card-sub">Select resume and template, then download</p>
+                </div>
+            </div>
+
+            <form method="POST" action="{{ url_for('download_pdf') }}" id="pdfForm">
+                <input type="hidden" name="template_name" id="selectedTemplate" value="modern">
+
+                <div class="form-group">
+                    <label for="resume_id">Select Resume</label>
+                    <select id="resume_id" name="resume_id" class="form-select" required>
+                        <option value="">-- Select a resume --</option>
+                        {% for r in resume_list %}
+                        <option value="{{ r.id }}">{{ r.full_name }} ({{ r.email }})</option>
+                        {% endfor %}
+                    </select>
+                    {% if not resume_list %}
+                    <div class="form-hint">No resumes saved yet. <a href="{{ url_for('resume_builder') }}">Create one first &rarr;</a></div>
+                    {% endif %}
+                </div>
+
+                <div class="selected-template-display">
+                    <div class="std-label">Selected Template:</div>
+                    <div class="std-name" id="selectedTemplateName">Modern</div>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-lg w-full" id="downloadBtn">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+                    </svg>
+                    Download PDF Resume
+                </button>
+            </form>
+
+            <div class="download-tips">
+                <h4 style="display: flex; align-items: center; gap: 6px;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="12" y1="16" x2="12" y2="12"/>
+                        <line x1="12" y1="8" x2="12.01" y2="8"/>
+                    </svg>
+                    PDF Tips
+                </h4>
+                <ul>
+                    <li>Fill out your resume completely before downloading</li>
+                    <li>Modern template is best for tech/IT roles</li>
+                    <li>Classic template is best for formal sectors (banking, gov)</li>
+                    <li>Minimal template has the highest ATS compatibility</li>
+                    <li>PDF is generated with all sections you filled in the builder</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let selectedTemplate = 'modern';
+
+function selectTemplate(name) {
+    // Remove all active states
+    document.querySelectorAll('.template-card').forEach(c => c.classList.remove('active'));
+    document.querySelectorAll('.template-check').forEach(c => c.classList.remove('visible'));
+
+    // Set active
+    document.getElementById('tpl-' + name).classList.add('active');
+    document.getElementById('check-' + name).classList.add('visible');
+    document.getElementById('selectedTemplate').value = name;
+
+    const names = { modern: 'Modern', classic: 'Classic', minimal: 'Minimal' };
+    document.getElementById('selectedTemplateName').textContent = names[name];
+    selectedTemplate = name;
+}
+
+// Default selection
+selectTemplate('modern');
+</script>
+{% endblock %}
+""",
+    'templates/upload.html': r"""
+{% extends "base.html" %}
+{% block title %}Upload Resume{% endblock %}
+{% block page_title %}Upload & Parse Resume{% endblock %}
+
+{% block content %}
+<div class="upload-layout">
+    <div class="form-card" style="max-width: 640px; margin: 0 auto;">
+        <div class="form-card-header">
+            <div class="form-card-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="17 8 12 3 7 8"/>
+                    <line x1="12" y1="3" x2="12" y2="15"/>
+                </svg>
+            </div>
+            <div>
+                <h2 class="form-card-title">Upload Your Resume</h2>
+                <p class="form-card-sub">Extract text from PDF or DOCX files</p>
+            </div>
+        </div>
+
+        <form method="POST" enctype="multipart/form-data">
+            <div class="upload-dropzone" id="dropzone" onclick="document.getElementById('resume_file').click()">
+                <div class="dropzone-icon">
+                    <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14 2 14 8 20 8"/>
+                        <line x1="12" y1="18" x2="12" y2="12"/>
+                        <polyline points="9 15 12 12 15 15"/>
+                    </svg>
+                </div>
+                <div class="dropzone-text">Click to upload or drag &amp; drop</div>
+                <div class="dropzone-sub">PDF or DOCX - max 10 MB</div>
+                <input type="file" id="resume_file" name="resume_file" accept=".pdf,.docx" style="display:none" onchange="showFilename(this)">
+                <div class="dropzone-filename" id="dropzoneFilename"></div>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-full" style="margin-top: 16px;">
+                Extract Text from File
+            </button>
+        </form>
+
+        {% if extracted_text %}
+        <div class="upload-result">
+            <h3 style="color: var(--purple-neon); margin-bottom: 12px;">Text Extracted Successfully</h3>
+            <div class="upload-text-box">{{ extracted_text }}</div>
+            <p style="color: var(--text-muted); font-size: 13px; margin-top: 12px;">
+                Copy this text and paste it into the ATS Analyzer or use it to fill the Resume Builder.
+            </p>
+            <div style="display:flex; gap:12px; margin-top: 12px;">
+                <a href="{{ url_for('ats_analyzer') }}" class="btn btn-primary btn-sm">Use in ATS Analyzer</a>
+                <a href="{{ url_for('resume_builder') }}" class="btn btn-outline btn-sm">Fill Resume Builder</a>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="upload-note">
+            <strong>Note:</strong> Upload requires <code>PyMuPDF</code> (PDF) or <code>python-docx</code> (DOCX) to be installed. If extraction fails, copy the text manually and paste it into the ATS Analyzer.
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function showFilename(input) {
+    const el = document.getElementById('dropzoneFilename');
+    if (input.files.length > 0) {
+        el.textContent = input.files[0].name;
+        el.style.display = 'block';
+    }
+}
+
+// Drag and drop
+const dropzone = document.getElementById('dropzone');
+dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('dragover'); });
+dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
+dropzone.addEventListener('drop', e => {
+    e.preventDefault();
+    dropzone.classList.remove('dragover');
+    const file = e.dataTransfer.files[0];
+    if (file) {
+        const input = document.getElementById('resume_file');
+        const dt = new DataTransfer();
+        dt.items.add(file);
+        input.files = dt.files;
+        showFilename(input);
+    }
+});
+</script>
+{% endblock %}
+""",
+    'templates/resume_builder.html': r"""
+{% extends "base.html" %}
+{% block title %}Resume Builder{% endblock %}
+{% block page_title %}{% if edit %}Edit Resume{% else %}Build New Resume{% endif %}{% endblock %}
+
+{% block content %}
+<form method="POST" id="resumeForm">
+
+<!-- Personal Information -->
+<div class="form-card">
+    <div class="form-card-header">
+        <div class="form-card-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+            </svg>
+        </div>
+        <div>
+            <h2 class="form-card-title">Personal Information</h2>
+            <p class="form-card-sub">Your basic contact details</p>
+        </div>
+    </div>
+    <div class="form-grid form-grid-2">
+        <div class="form-group">
+            <label for="full_name">Full Name <span class="required">*</span></label>
+            <input type="text" id="full_name" name="full_name" class="form-input"
+                placeholder="e.g., Devadharshini R" required
+                value="{{ resume.full_name if resume else '' }}">
+        </div>
+        <div class="form-group">
+            <label for="email">Email Address <span class="required">*</span></label>
+            <input type="email" id="email" name="email" class="form-input"
+                placeholder="you@email.com" required
+                value="{{ resume.email if resume else '' }}">
+        </div>
+        <div class="form-group">
+            <label for="phone">Phone Number</label>
+            <input type="text" id="phone" name="phone" class="form-input"
+                placeholder="+91 98765 43210"
+                value="{{ resume.phone if resume else '' }}">
+        </div>
+        <div class="form-group">
+            <label for="location">Location</label>
+            <input type="text" id="location" name="location" class="form-input"
+                placeholder="Chennai, Tamil Nadu"
+                value="{{ resume.location if resume else '' }}">
+        </div>
+        <div class="form-group">
+            <label for="linkedin">LinkedIn Profile URL</label>
+            <input type="url" id="linkedin" name="linkedin" class="form-input"
+                placeholder="https://linkedin.com/in/yourprofile"
+                value="{{ resume.linkedin if resume else '' }}">
+        </div>
+        <div class="form-group">
+            <label for="portfolio">Portfolio / GitHub URL</label>
+            <input type="url" id="portfolio" name="portfolio" class="form-input"
+                placeholder="https://github.com/yourname"
+                value="{{ resume.portfolio if resume else '' }}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="summary">Professional Summary</label>
+        <textarea id="summary" name="summary" class="form-textarea" rows="3"
+            placeholder="Write a compelling 2-3 sentence summary of your professional background, key skills, and career goals...">{{ resume.summary if resume else '' }}</textarea>
+    </div>
+</div>
+
+<!-- Education -->
+<div class="form-card">
+    <div class="form-card-header">
+        <div class="form-card-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+                <path d="M6 12v5c3 3 9 3 12 0v-5"/>
+            </svg>
+        </div>
+        <div>
+            <h2 class="form-card-title">Education</h2>
+            <p class="form-card-sub">Academic qualifications</p>
+        </div>
+    </div>
+    <div id="educationList">
+        {% if resume and resume.education %}
+            {% for edu in resume.education %}
+            <div class="dynamic-row" data-row="education">
+                <div class="form-grid form-grid-4">
+                    <div class="form-group">
+                        <label>Degree / Course</label>
+                        <input type="text" name="edu_degree" class="form-input" placeholder="MCA / B.Sc. CS" value="{{ edu.degree }}">
+                    </div>
+                    <div class="form-group">
+                        <label>Institution</label>
+                        <input type="text" name="edu_institution" class="form-input" placeholder="University Name" value="{{ edu.institution }}">
+                    </div>
+                    <div class="form-group">
+                        <label>Year</label>
+                        <input type="text" name="edu_year" class="form-input" placeholder="2022 - 2024" value="{{ edu.year }}">
+                    </div>
+                    <div class="form-group">
+                        <label>Grade / CGPA</label>
+                        <input type="text" name="edu_grade" class="form-input" placeholder="8.5 CGPA" value="{{ edu.grade }}">
+                    </div>
+                </div>
+                <button type="button" class="btn-remove" onclick="removeRow(this)">&times; Remove</button>
+            </div>
+            {% endfor %}
+        {% else %}
+        <div class="dynamic-row" data-row="education">
+            <div class="form-grid form-grid-4">
+                <div class="form-group">
+                    <label>Degree / Course</label>
+                    <input type="text" name="edu_degree" class="form-input" placeholder="MCA / B.Sc. CS">
+                </div>
+                <div class="form-group">
+                    <label>Institution</label>
+                    <input type="text" name="edu_institution" class="form-input" placeholder="University Name">
+                </div>
+                <div class="form-group">
+                    <label>Year</label>
+                    <input type="text" name="edu_year" class="form-input" placeholder="2022 - 2024">
+                </div>
+                <div class="form-group">
+                    <label>Grade / CGPA</label>
+                    <input type="text" name="edu_grade" class="form-input" placeholder="8.5 CGPA">
+                </div>
+            </div>
+            <button type="button" class="btn-remove" onclick="removeRow(this)">&times; Remove</button>
+        </div>
+        {% endif %}
+    </div>
+    <button type="button" class="btn btn-ghost btn-sm" onclick="addEducation()">+ Add Education</button>
+</div>
+
+<!-- Work Experience -->
+<div class="form-card">
+    <div class="form-card-header">
+        <div class="form-card-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
+                <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+            </svg>
+        </div>
+        <div>
+            <h2 class="form-card-title">Work Experience</h2>
+            <p class="form-card-sub">Jobs, internships, and roles</p>
+        </div>
+    </div>
+    <div id="experienceList">
+        {% if resume and resume.experience %}
+            {% for exp in resume.experience %}
+            <div class="dynamic-row" data-row="experience">
+                <div class="form-grid form-grid-3">
+                    <div class="form-group">
+                        <label>Job Title / Role</label>
+                        <input type="text" name="exp_role" class="form-input" placeholder="Software Tester" value="{{ exp.role }}">
+                    </div>
+                    <div class="form-group">
+                        <label>Company</label>
+                        <input type="text" name="exp_company" class="form-input" placeholder="Company Name" value="{{ exp.company }}">
+                    </div>
+                    <div class="form-group">
+                        <label>Duration</label>
+                        <input type="text" name="exp_duration" class="form-input" placeholder="Jun 2023 - Present" value="{{ exp.duration }}">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Responsibilities &amp; Achievements</label>
+                    <textarea name="exp_description" class="form-textarea" rows="3"
+                        placeholder="- Designed and executed manual test cases for web applications&#10;- Automated regression tests using Selenium and Java&#10;- Reduced bug escape rate by 30%">{{ exp.description }}</textarea>
+                </div>
+                <button type="button" class="btn-remove" onclick="removeRow(this)">&times; Remove</button>
+            </div>
+            {% endfor %}
+        {% else %}
+        <div class="dynamic-row" data-row="experience">
+            <div class="form-grid form-grid-3">
+                <div class="form-group">
+                    <label>Job Title / Role</label>
+                    <input type="text" name="exp_role" class="form-input" placeholder="Software Tester">
+                </div>
+                <div class="form-group">
+                    <label>Company</label>
+                    <input type="text" name="exp_company" class="form-input" placeholder="Company Name">
+                </div>
+                <div class="form-group">
+                    <label>Duration</label>
+                    <input type="text" name="exp_duration" class="form-input" placeholder="Jun 2023 - Present">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Responsibilities &amp; Achievements</label>
+                <textarea name="exp_description" class="form-textarea" rows="3"
+                    placeholder="- Describe your responsibilities and achievements (one per line)..."></textarea>
+            </div>
+            <button type="button" class="btn-remove" onclick="removeRow(this)">&times; Remove</button>
+        </div>
+        {% endif %}
+    </div>
+    <button type="button" class="btn btn-ghost btn-sm" onclick="addExperience()">+ Add Experience</button>
+</div>
+
+<!-- Skills -->
+<div class="form-card">
+    <div class="form-card-header">
+        <div class="form-card-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+            </svg>
+        </div>
+        <div>
+            <h2 class="form-card-title">Skills</h2>
+            <p class="form-card-sub">Technical and soft skills - comma or newline separated</p>
+        </div>
+    </div>
+    <div class="form-group">
+        <textarea id="skills" name="skills" class="form-textarea" rows="4"
+            placeholder="Python, Java, SQL, Selenium, Manual Testing, Agile, JIRA, Git, HTML, CSS">{{ resume.skills if resume else '' }}</textarea>
+        <div class="form-hint">Tip: Include skills that match the job descriptions you're targeting</div>
+    </div>
+</div>
+
+<!-- Projects -->
+<div class="form-card">
+    <div class="form-card-header">
+        <div class="form-card-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/>
+                <path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/>
+                <path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/>
+                <path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/>
+            </svg>
+        </div>
+        <div>
+            <h2 class="form-card-title">Projects</h2>
+            <p class="form-card-sub">Academic, personal, or professional projects</p>
+        </div>
+    </div>
+    <div id="projectList">
+        {% if resume and resume.projects %}
+            {% for proj in resume.projects %}
+            <div class="dynamic-row" data-row="project">
+                <div class="form-grid form-grid-2">
+                    <div class="form-group">
+                        <label>Project Title</label>
+                        <input type="text" name="proj_title" class="form-input" placeholder="ATS Resume Builder" value="{{ proj.title }}">
+                    </div>
+                    <div class="form-group">
+                        <label>Technologies Used</label>
+                        <input type="text" name="proj_tech" class="form-input" placeholder="Python, Flask, SQLite" value="{{ proj.tech }}">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea name="proj_description" class="form-textarea" rows="2"
+                        placeholder="Brief description of the project and your contribution...">{{ proj.description }}</textarea>
+                </div>
+                <button type="button" class="btn-remove" onclick="removeRow(this)">&times; Remove</button>
+            </div>
+            {% endfor %}
+        {% else %}
+        <div class="dynamic-row" data-row="project">
+            <div class="form-grid form-grid-2">
+                <div class="form-group">
+                    <label>Project Title</label>
+                    <input type="text" name="proj_title" class="form-input" placeholder="ATS Resume Builder">
+                </div>
+                <div class="form-group">
+                    <label>Technologies Used</label>
+                    <input type="text" name="proj_tech" class="form-input" placeholder="Python, Flask, SQLite">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Description</label>
+                <textarea name="proj_description" class="form-textarea" rows="2"
+                    placeholder="Brief description of the project and your contribution..."></textarea>
+            </div>
+            <button type="button" class="btn-remove" onclick="removeRow(this)">&times; Remove</button>
+        </div>
+        {% endif %}
+    </div>
+    <button type="button" class="btn btn-ghost btn-sm" onclick="addProject()">+ Add Project</button>
+</div>
+
+<!-- Certifications -->
+<div class="form-card">
+    <div class="form-card-header">
+        <div class="form-card-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="8" r="7"/>
+                <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/>
+            </svg>
+        </div>
+        <div>
+            <h2 class="form-card-title">Certifications &amp; Achievements</h2>
+            <p class="form-card-sub">One per line</p>
+        </div>
+    </div>
+    <div class="form-group">
+        <textarea id="certifications" name="certifications" class="form-textarea" rows="4"
+            placeholder="AWS Certified Cloud Practitioner - 2024&#10;Selenium WebDriver with Java - Udemy&#10;Postman API Testing - Coursera">{{ resume.certifications if resume else '' }}</textarea>
+    </div>
+</div>
+
+<!-- Submit -->
+<div class="form-actions">
+    <a href="{{ url_for('dashboard') }}" class="btn btn-ghost">Cancel</a>
+    <button type="submit" class="btn btn-primary btn-lg" id="saveBtn">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+            <polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/>
+        </svg>
+        {% if edit %}Update Resume{% else %}Save Resume{% endif %}
+    </button>
+</div>
+
+</form>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/resume_builder.js') }}"></script>
+{% endblock %}
+""",
+    'templates/view_resume.html': r"""
+{% extends "base.html" %}
 {% block title %}View Resume{% endblock %}
 {% block page_title %}Resume Preview{% endblock %}
 
 {% block content %}
 <div class="resume-view-header">
     <div class="resume-view-actions">
-        <a href="{{ url_for('edit_resume', resume_id=resume.id) }}" class="btn btn-outline">✏️ Edit</a>
-        <a href="{{ url_for('ats_analyzer') }}" class="btn btn-outline">🎯 Analyze ATS</a>
-        <a href="{{ url_for('templates_page') }}" class="btn btn-primary">📄 Download PDF</a>
+        <a href="{{ url_for('edit_resume', resume_id=resume.id) }}" class="btn btn-outline">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle; margin-right:4px;">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+            </svg>
+            Edit
+        </a>
+        <a href="{{ url_for('ats_analyzer') }}" class="btn btn-outline">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle; margin-right:4px;">
+                <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>
+            </svg>
+            Analyze ATS
+        </a>
+        <a href="{{ url_for('pdf_rebuilder') }}?resume_id={{ resume.id }}" class="btn btn-secondary" style="background: rgba(147, 51, 234, 0.35); border: 1px solid rgba(192, 132, 252, 0.45); color: #f3e8ff;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle; margin-right:4px;">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+                <path d="M12 18v-6M9 15l3-3 3 3"/>
+            </svg>
+            Rebuild in PDF
+        </a>
+        <a href="{{ url_for('templates_page') }}" class="btn btn-primary">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle; margin-right:4px;">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            Download PDF
+        </a>
         <form method="POST" action="{{ url_for('delete_resume', resume_id=resume.id) }}" style="display:inline" onsubmit="return confirm('Delete this resume?')">
-            <button class="btn btn-danger">🗑️ Delete</button>
+            <button class="btn btn-danger">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle; margin-right:4px;">
+                    <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                </svg>
+                Delete
+            </button>
         </form>
     </div>
 </div>
@@ -391,11 +2264,11 @@ document.addEventListener('submit', (e) => {
         <div class="rp-header-info">
             <h1 class="rp-name">{{ resume.full_name or 'Name' }}</h1>
             <div class="rp-contacts">
-                {% if resume.email %}<span>✉️ {{ resume.email }}</span>{% endif %}
-                {% if resume.phone %}<span>📞 {{ resume.phone }}</span>{% endif %}
-                {% if resume.location %}<span>📍 {{ resume.location }}</span>{% endif %}
-                {% if resume.linkedin %}<a href="{{ resume.linkedin }}" target="_blank">🔗 LinkedIn</a>{% endif %}
-                {% if resume.portfolio %}<a href="{{ resume.portfolio }}" target="_blank">💻 Portfolio</a>{% endif %}
+                {% if resume.email %}<span>{{ resume.email }}</span>{% endif %}
+                {% if resume.phone %}<span>{{ resume.phone }}</span>{% endif %}
+                {% if resume.location %}<span>{{ resume.location }}</span>{% endif %}
+                {% if resume.linkedin %}<a href="{{ resume.linkedin }}" target="_blank">LinkedIn &nearr;</a>{% endif %}
+                {% if resume.portfolio %}<a href="{{ resume.portfolio }}" target="_blank">Portfolio &nearr;</a>{% endif %}
             </div>
         </div>
     </div>
@@ -427,11 +2300,11 @@ document.addEventListener('submit', (e) => {
         <div class="rp-exp-item">
             <div class="rp-exp-header">
                 <div class="rp-exp-role">{{ exp.role }}</div>
-                <div class="rp-exp-meta">{{ exp.company }}{% if exp.duration %} · {{ exp.duration }}{% endif %}</div>
+                <div class="rp-exp-meta">{{ exp.company }}{% if exp.duration %} | {{ exp.duration }}{% endif %}</div>
             </div>
             {% if exp.description %}
             <div class="rp-exp-desc">
-                {% for line in exp.description.split('\n') %}{% if line.strip() %}<div class="rp-bullet">{{ line.strip().lstrip('•-').strip() }}</div>{% endif %}{% endfor %}
+                {% for line in exp.description.split('\n') %}{% if line.strip() %}<div class="rp-bullet">{{ line.strip().lstrip('*- ').strip() }}</div>{% endif %}{% endfor %}
             </div>
             {% endif %}
         </div>
@@ -445,7 +2318,7 @@ document.addEventListener('submit', (e) => {
         {% for edu in resume.education %}
         <div class="rp-edu-item">
             <div class="rp-edu-degree">{{ edu.degree }}</div>
-            <div class="rp-edu-meta">{{ edu.institution }}{% if edu.year %} · {{ edu.year }}{% endif %}{% if edu.grade %} · {{ edu.grade }}{% endif %}</div>
+            <div class="rp-edu-meta">{{ edu.institution }}{% if edu.year %} | {{ edu.year }}{% endif %}{% if edu.grade %} | {{ edu.grade }}{% endif %}</div>
         </div>
         {% endfor %}
     </div>
@@ -462,7 +2335,7 @@ document.addEventListener('submit', (e) => {
             </div>
             {% if proj.description %}
             <div class="rp-exp-desc">
-                {% for line in proj.description.split('\n') %}{% if line.strip() %}<div class="rp-bullet">{{ line.strip().lstrip('•-').strip() }}</div>{% endif %}{% endfor %}
+                {% for line in proj.description.split('\n') %}{% if line.strip() %}<div class="rp-bullet">{{ line.strip().lstrip('*- ').strip() }}</div>{% endif %}{% endfor %}
             </div>
             {% endif %}
         </div>
@@ -475,7 +2348,7 @@ document.addEventListener('submit', (e) => {
         <div class="rp-section-title">Certifications</div>
         {% for cert in resume.certifications.split('\n') %}
             {% if cert.strip() %}
-            <div class="rp-bullet">🏆 {{ cert.strip().lstrip('•-').strip() }}</div>
+            <div class="rp-bullet">{{ cert.strip().lstrip('*- ').strip() }}</div>
             {% endif %}
         {% endfor %}
     </div>
@@ -483,12 +2356,13 @@ document.addEventListener('submit', (e) => {
 </div>
 {% endblock %}
 """,
-    'static/css/style.css': r"""/* ============================================================
-   ATS RESUME BUILDER — ALL-PURPLE CYBERPUNK GLASS THEME
+    'static/css/style.css': r"""
+/* ============================================================
+   ATS RESUME BUILDER - ALL-PURPLE CYBERPUNK GLASS THEME
    Universal Device Optimization: Mobile, Tablet, Laptop, 4K
    ============================================================ */
 
-/* ── Global Custom Properties: Exclusive Purple Palette ── */
+/* -- Global Custom Properties: Exclusive Purple Palette -- */
 :root {
     /* Cosmic Purple Background Tones */
     --bg-darkest:    #060012;
@@ -550,7 +2424,7 @@ document.addEventListener('submit', (e) => {
     --ease-smooth: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* ── Reset & Cross-Device Base ───────────────────────────── */
+/* -- Reset & Cross-Device Base ----------------------------- */
 *, *::before, *::after {
     box-sizing: border-box;
     margin: 0;
@@ -585,7 +2459,7 @@ button, input, textarea, select {
     font-family: inherit;
 }
 
-/* ── Dynamic Ambient Animated Purple Nebulae ─────────────── */
+/* -- Dynamic Ambient Animated Purple Nebulae --------------- */
 @keyframes cosmicPurpleShift {
     0%   { background-position: 0% 50%; }
     50%  { background-position: 100% 50%; }
@@ -639,7 +2513,7 @@ body::after {
     will-change: transform;
 }
 
-/* ── Custom Purple Scrollbars ────────────────────────────── */
+/* -- Custom Purple Scrollbars ------------------------------ */
 ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
@@ -983,7 +2857,7 @@ body::after {
     width: 100%;
 }
 
-/* ── Flash Notifications ─────────────────────────────────── */
+/* -- Flash Notifications ----------------------------------- */
 .flash-container {
     padding: 16px 28px 0;
     display: flex;
@@ -1752,7 +3626,7 @@ body::after {
 }
 
 .tips-list li::before {
-    content: '→';
+    content: '\2192';
     position: absolute;
     left: 0;
     color: var(--purple-neon);
@@ -2055,7 +3929,7 @@ body::after {
     box-shadow: 0 0 10px var(--purple-bright);
 }
 .template-check::after {
-    content: '✓';
+    content: '\2713';
     color: #ffffff;
     font-size: 12px;
     font-weight: 800;
@@ -2118,7 +3992,7 @@ body::after {
     position: relative;
 }
 .download-tips li::before {
-    content: '→';
+    content: '\2192';
     position: absolute;
     left: 0;
     color: var(--purple-neon);
@@ -2488,7 +4362,7 @@ body::after {
     border: 1px solid var(--border-subtle);
 }
 
-/* ── Modal Popup ─────────────────────────────────────────── */
+/* -- Modal Popup ------------------------------------------- */
 .modal-overlay {
     display: none;
     position: fixed;
@@ -2660,7 +4534,7 @@ body::after {
 .rp-exp-meta { font-size: 13px; color: var(--text-secondary); margin-top: 2px; }
 .rp-exp-desc { display: flex; flex-direction: column; gap: 4px; margin-top: 6px; }
 .rp-bullet   { font-size: 13px; color: var(--text-secondary); padding-left: 14px; position: relative; }
-.rp-bullet::before { content: '→'; position: absolute; left: 0; color: var(--purple-bright); }
+.rp-bullet::before { content: '\2192'; position: absolute; left: 0; color: var(--purple-bright); }
 .rp-edu-item   { margin-bottom: 10px; }
 .rp-edu-degree { font-size: 14px; font-weight: 700; color: var(--text-primary); }
 .rp-edu-meta   { font-size: 13px; color: var(--text-secondary); }
@@ -2747,7 +4621,7 @@ body::after {
    RESPONSIVE OPTIMIZATION ACROSS ALL DEVICES
    ============================================================ */
 
-/* ── 1. Large Monitors & 4K Displays (≥ 1441px) ──────────── */
+/* -- 1. Large Monitors & 4K Displays (- 1441px) ------------ */
 @media (min-width: 1441px) {
     .page-content {
         padding: 36px 40px;
@@ -2760,7 +4634,7 @@ body::after {
     }
 }
 
-/* ── 2. Medium Laptops & Desktops (1025px - 1440px) ───────── */
+/* -- 2. Medium Laptops & Desktops (1025px - 1440px) --------- */
 @media (max-width: 1440px) and (min-width: 1025px) {
     .dashboard-hero {
         padding: 36px;
@@ -2770,7 +4644,7 @@ body::after {
     }
 }
 
-/* ── 3. Tablets & Small Laptops (769px - 1024px) ──────────── */
+/* -- 3. Tablets & Small Laptops (769px - 1024px) ------------ */
 @media (max-width: 1024px) {
     :root {
         --sidebar-w: 240px;
@@ -2807,7 +4681,7 @@ body::after {
     }
 }
 
-/* ── 4. Mobile Devices & Small Tablets (≤ 768px) ──────────── */
+/* -- 4. Mobile Devices & Small Tablets (- 768px) ------------ */
 @media (max-width: 768px) {
     :root {
         --topbar-h: 56px;
@@ -2983,7 +4857,7 @@ body::after {
     }
 }
 
-/* ── 5. Small Handheld Phones (≤ 420px) ────────────────────── */
+/* -- 5. Small Handheld Phones (- 420px) ---------------------- */
 @media (max-width: 420px) {
     .topbar-chip {
         display: none;
@@ -3023,7 +4897,7 @@ body::after {
     }
 }
 
-/* ── Touch Optimization for Touchscreens ──────────────────── */
+/* -- Touch Optimization for Touchscreens -------------------- */
 @media (hover: none) and (pointer: coarse) {
     .nav-item {
         min-height: 48px;
@@ -3048,7 +4922,7 @@ body::after {
     }
 }
 
-/* ── Print Styles ─────────────────────────────────────────── */
+/* -- Print Styles ------------------------------------------- */
 @media print {
     .sidebar, .topbar, .flash-container, .form-actions,
     .btn, .ats-actions, .interview-actions, .menu-btn {
@@ -3066,975 +4940,148 @@ body::after {
     }
 }
 """,
-    'templates/upload.html': r"""{% extends "base.html" %}
-{% block title %}Upload Resume{% endblock %}
-{% block page_title %}Upload & Parse Resume{% endblock %}
-
-{% block content %}
-<div class="upload-layout">
-    <div class="form-card" style="max-width: 640px; margin: 0 auto;">
-        <div class="form-card-header">
-            <div class="form-card-icon">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                    <polyline points="17 8 12 3 7 8"/>
-                    <line x1="12" y1="3" x2="12" y2="15"/>
-                </svg>
-            </div>
-            <div>
-                <h2 class="form-card-title">Upload Your Resume</h2>
-                <p class="form-card-sub">Extract text from PDF or DOCX files</p>
-            </div>
-        </div>
-
-        <form method="POST" enctype="multipart/form-data">
-            <div class="upload-dropzone" id="dropzone" onclick="document.getElementById('resume_file').click()">
-                <div class="dropzone-icon">
-                    <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                        <polyline points="14 2 14 8 20 8"/>
-                        <line x1="12" y1="18" x2="12" y2="12"/>
-                        <polyline points="9 15 12 12 15 15"/>
-                    </svg>
-                </div>
-                <div class="dropzone-text">Click to upload or drag &amp; drop</div>
-                <div class="dropzone-sub">PDF or DOCX - max 10 MB</div>
-                <input type="file" id="resume_file" name="resume_file" accept=".pdf,.docx" style="display:none" onchange="showFilename(this)">
-                <div class="dropzone-filename" id="dropzoneFilename"></div>
-            </div>
-
-            <button type="submit" class="btn btn-primary w-full" style="margin-top: 16px;">
-                Extract Text from File
-            </button>
-        </form>
-
-        {% if extracted_text %}
-        <div class="upload-result">
-            <h3 style="color: var(--purple-neon); margin-bottom: 12px;">Text Extracted Successfully</h3>
-            <div class="upload-text-box">{{ extracted_text }}</div>
-            <p style="color: var(--text-muted); font-size: 13px; margin-top: 12px;">
-                Copy this text and paste it into the ATS Analyzer or use it to fill the Resume Builder.
-            </p>
-            <div style="display:flex; gap:12px; margin-top: 12px;">
-                <a href="{{ url_for('ats_analyzer') }}" class="btn btn-primary btn-sm">Use in ATS Analyzer</a>
-                <a href="{{ url_for('resume_builder') }}" class="btn btn-outline btn-sm">Fill Resume Builder</a>
-            </div>
-        </div>
-        {% endif %}
-
-        <div class="upload-note">
-            <strong>Note:</strong> Upload requires <code>PyMuPDF</code> (PDF) or <code>python-docx</code> (DOCX) to be installed. If extraction fails, copy the text manually and paste it into the ATS Analyzer.
-        </div>
-    </div>
-</div>
-{% endblock %}
-
-{% block scripts %}
-<script>
-function showFilename(input) {
-    const el = document.getElementById('dropzoneFilename');
-    if (input.files.length > 0) {
-        el.textContent = '📎 ' + input.files[0].name;
-        el.style.display = 'block';
+    'static/js/main.js': r"""
+// === Mobile Responsive Sidebar Toggle =========================================
+function toggleSidebar(forceState) {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+    const menuBtn = document.getElementById('menuBtn');
+    
+    const shouldOpen = (typeof forceState === 'boolean') ? forceState : !sidebar.classList.contains('open');
+    
+    if (shouldOpen) {
+        sidebar.classList.add('open');
+        overlay.classList.add('open');
+        if (menuBtn) menuBtn.classList.add('open');
+        document.body.style.overflow = window.innerWidth <= 768 ? 'hidden' : '';
+    } else {
+        sidebar.classList.remove('open');
+        overlay.classList.remove('open');
+        if (menuBtn) menuBtn.classList.remove('open');
+        document.body.style.overflow = '';
     }
 }
 
-// Drag and drop
-const dropzone = document.getElementById('dropzone');
-dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('dragover'); });
-dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
-dropzone.addEventListener('drop', e => {
-    e.preventDefault();
-    dropzone.classList.remove('dragover');
-    const file = e.dataTransfer.files[0];
-    if (file) {
-        const input = document.getElementById('resume_file');
-        const dt = new DataTransfer();
-        dt.items.add(file);
-        input.files = dt.files;
-        showFilename(input);
+// Close sidebar when clicking any navigation link on small screens
+document.addEventListener('DOMContentLoaded', () => {
+    const navItems = document.querySelectorAll('.sidebar .nav-item');
+    navItems.forEach(item => {
+        item.addEventListener('click', () => {
+            if (window.innerWidth <= 768) {
+                toggleSidebar(false);
+            }
+        });
+    });
+
+    // Handle Escape key to close mobile menu or open modals
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            toggleSidebar(false);
+            const openModal = document.querySelector('.modal-overlay.open');
+            if (openModal) openModal.classList.remove('open');
+        }
+    });
+
+    // Auto-dismiss flash notifications after 5 seconds
+    const flashes = document.querySelectorAll('.flash');
+    flashes.forEach(f => {
+        setTimeout(() => {
+            f.style.opacity = '0';
+            f.style.transform = 'translateY(-8px)';
+            f.style.transition = 'all 0.3s ease';
+            setTimeout(() => f.remove(), 300);
+        }, 5000);
+    });
+
+    // Smooth count-up animation for stat numbers
+    document.querySelectorAll('.stat-value').forEach(el => {
+        const target = parseInt(el.textContent.trim());
+        if (!isNaN(target) && target > 0) {
+            animateCount(el, 0, target, 800);
+        }
+    });
+});
+
+function animateCount(el, start, end, duration) {
+    const startTime = performance.now();
+    const update = (currentTime) => {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        el.textContent = Math.round(start + (end - start) * eased);
+        if (progress < 1) requestAnimationFrame(update);
+    };
+    requestAnimationFrame(update);
+}
+
+// === Interactive Purple Ripple Effect on Buttons ===============================
+document.addEventListener('click', (e) => {
+    const btn = e.target.closest('.btn-primary, .btn-outline, .btn-ghost');
+    if (!btn) return;
+
+    const ripple = document.createElement('span');
+    const rect = btn.getBoundingClientRect();
+    const size = Math.max(rect.width, rect.height);
+
+    ripple.style.cssText = `
+        position: absolute;
+        width: ${size}px;
+        height: ${size}px;
+        border-radius: 50%;
+        background: rgba(232, 121, 249, 0.35);
+        top: ${e.clientY - rect.top - size / 2}px;
+        left: ${e.clientX - rect.left - size / 2}px;
+        transform: scale(0);
+        animation: purpleRipple 0.55s ease-out;
+        pointer-events: none;
+    `;
+
+    if (!document.getElementById('purpleRippleStyle')) {
+        const style = document.createElement('style');
+        style.id = 'purpleRippleStyle';
+        style.textContent = '@keyframes purpleRipple { to { transform: scale(2.6); opacity: 0; } }';
+        document.head.appendChild(style);
+    }
+
+    btn.style.position = 'relative';
+    btn.style.overflow = 'hidden';
+    btn.appendChild(ripple);
+    setTimeout(() => ripple.remove(), 600);
+});
+
+// === Responsive Loading State for Form Submissions ============================
+document.addEventListener('submit', (e) => {
+    const btn = e.target.querySelector('button[type="submit"]');
+    if (btn) {
+        const originalText = btn.innerHTML;
+        btn.innerHTML = `
+            <span style="display:inline-flex;align-items:center;gap:8px">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="animation:spin 1s linear infinite">
+                    <circle cx="12" cy="12" r="10" stroke="#c084fc" opacity="0.25"/>
+                    <path d="M12 2a10 10 0 0 1 10 10" stroke="#f3e8ff"/>
+                </svg>
+                Processing...
+            </span>
+        `;
+        btn.disabled = true;
+
+        if (!document.getElementById('spinStyle')) {
+            const style = document.createElement('style');
+            style.id = 'spinStyle';
+            style.textContent = '@keyframes spin { to { transform: rotate(360deg); } }';
+            document.head.appendChild(style);
+        }
+
+        // Safety failsafe: re-enable button after 10s if network stalls
+        setTimeout(() => {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }, 10000);
     }
 });
-</script>
-{% endblock %}
 """,
-    'templates/index.html': r"""{% extends "base.html" %}
-{% block title %}Dashboard{% endblock %}
-{% block page_title %}Dashboard{% endblock %}
-
-{% block content %}
-<div class="dashboard-hero">
-    <div class="hero-content">
-        <div class="hero-badge">🤖 AI-Powered</div>
-        <h1 class="hero-title">Build Resumes That Beat the ATS</h1>
-        <p class="hero-subtitle">Create tailored resumes, analyze your job match score, identify skill gaps, and prepare for interviews — all in one place.</p>
-        <div class="hero-actions">
-            <a href="{{ url_for('resume_builder') }}" class="btn btn-primary btn-lg">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-                </svg>
-                Build Resume
-            </a>
-            <a href="{{ url_for('ats_analyzer') }}" class="btn btn-outline btn-lg">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-                </svg>
-                Analyze ATS Score
-            </a>
-        </div>
-    </div>
-    <div class="hero-illustration">
-        <div class="hero-score-card">
-            <div class="score-ring-demo">
-                <svg width="120" height="120" viewBox="0 0 120 120">
-                    <circle cx="60" cy="60" r="50" fill="none" stroke="rgba(168, 85, 247, 0.2)" stroke-width="10"/>
-                    <circle cx="60" cy="60" r="50" fill="none" stroke="url(#scoreGradPurple)" stroke-width="10"
-                        stroke-dasharray="251" stroke-dashoffset="63" stroke-linecap="round"
-                        transform="rotate(-90 60 60)"/>
-                    <defs>
-                        <linearGradient id="scoreGradPurple" x1="0" y1="0" x2="1" y2="1">
-                            <stop offset="0%" stop-color="#9333ea"/>
-                            <stop offset="50%" stop-color="#c084fc"/>
-                            <stop offset="100%" stop-color="#e9d5ff"/>
-                        </linearGradient>
-                    </defs>
-                </svg>
-                <div class="score-ring-label">75%</div>
-            </div>
-            <div class="score-card-label">ATS Match Score</div>
-        </div>
-    </div>
-</div>
-
-<!-- Stats Row -->
-<div class="stats-grid">
-    <div class="stat-card">
-        <div class="stat-icon stat-icon-purple">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                <polyline points="14 2 14 8 20 8"/>
-            </svg>
-        </div>
-        <div class="stat-info">
-            <div class="stat-value">{{ resumes|length }}</div>
-            <div class="stat-label">Resumes Created</div>
-        </div>
-    </div>
-    <div class="stat-card">
-        <div class="stat-icon stat-icon-blue">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
-            </svg>
-        </div>
-        <div class="stat-info">
-            <div class="stat-value">{{ stats.total }}</div>
-            <div class="stat-label">Jobs Tracked</div>
-        </div>
-    </div>
-    <div class="stat-card">
-        <div class="stat-icon stat-icon-green">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
-            </svg>
-        </div>
-        <div class="stat-info">
-            <div class="stat-value">{{ stats.by_status.get('Interview', 0) }}</div>
-            <div class="stat-label">Interviews</div>
-        </div>
-    </div>
-    <div class="stat-card">
-        <div class="stat-icon stat-icon-amber">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-                <polyline points="22 4 12 14.01 9 11.01"/>
-            </svg>
-        </div>
-        <div class="stat-info">
-            <div class="stat-value">{{ stats.by_status.get('Offer', 0) }}</div>
-            <div class="stat-label">Offers Received</div>
-        </div>
-    </div>
-</div>
-
-<!-- Feature Cards -->
-<div class="section-header">
-    <h2 class="section-title">All Features</h2>
-    <p class="section-sub">Everything you need to land your dream job</p>
-</div>
-
-<div class="feature-grid">
-    <a href="{{ url_for('resume_builder') }}" class="feature-card feature-card-1">
-        <div class="feature-icon">
-            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                <polyline points="14 2 14 8 20 8"/>
-                <line x1="16" y1="13" x2="8" y2="13"/>
-                <line x1="16" y1="17" x2="8" y2="17"/>
-                <polyline points="10 9 9 9 8 9"/>
-            </svg>
-        </div>
-        <h3>Resume Builder</h3>
-        <p>Create structured resumes with education, experience, skills, and projects. Save and manage multiple resumes.</p>
-        <div class="feature-arrow">&rarr;</div>
-    </a>
-    <a href="{{ url_for('ats_analyzer') }}" class="feature-card feature-card-2">
-        <div class="feature-icon">
-            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10"/>
-                <circle cx="12" cy="12" r="6"/>
-                <circle cx="12" cy="12" r="2"/>
-            </svg>
-        </div>
-        <h3>ATS Match Analyzer</h3>
-        <p>Paste a job description and instantly see your match score, matched skills, and missing skills.</p>
-        <div class="feature-arrow">&rarr;</div>
-    </a>
-    <a href="{{ url_for('ats_analyzer') }}" class="feature-card feature-card-3">
-        <div class="feature-icon">
-            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="11" cy="11" r="8"/>
-                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-                <line x1="11" y1="8" x2="11" y2="14"/>
-                <line x1="8" y1="11" x2="14" y2="11"/>
-            </svg>
-        </div>
-        <h3>Skill Gap Analyzer</h3>
-        <p>Discover exactly which skills you are missing with curated learning resources for each gap.</p>
-        <div class="feature-arrow">&rarr;</div>
-    </a>
-    <a href="{{ url_for('templates_page') }}" class="feature-card feature-card-4">
-        <div class="feature-icon">
-            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="3" y="3" width="18" height="18" rx="2"/>
-                <path d="M3 9h18M9 21V9"/>
-            </svg>
-        </div>
-        <h3>Resume Templates</h3>
-        <p>Choose from Modern, Classic, or Minimal templates and download a professional PDF instantly.</p>
-        <div class="feature-arrow">&rarr;</div>
-    </a>
-    <a href="{{ url_for('interview_prep') }}" class="feature-card feature-card-5">
-        <div class="feature-icon">
-            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-            </svg>
-        </div>
-        <h3>Interview Prep</h3>
-        <p>Generate HR, technical, and situational interview questions based on the job description.</p>
-        <div class="feature-arrow">&rarr;</div>
-    </a>
-    <a href="{{ url_for('tracker') }}" class="feature-card feature-card-6">
-        <div class="feature-icon">
-            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M9 11l3 3L22 4"/>
-                <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
-            </svg>
-        </div>
-        <h3>Job Tracker</h3>
-        <p>Track every application - company, role, status, dates, and notes in one organized place.</p>
-        <div class="feature-arrow">&rarr;</div>
-    </a>
-</div>
-
-<!-- Recent Resumes -->
-{% if resumes %}
-<div class="section-header">
-    <h2 class="section-title">Recent Resumes</h2>
-    <a href="{{ url_for('resume_builder') }}" class="btn btn-sm btn-outline">+ New Resume</a>
-</div>
-<div class="resume-list">
-    {% for r in resumes[:5] %}
-    <div class="resume-list-item">
-        <div class="resume-avatar">{{ r.full_name[0].upper() if r.full_name else '?' }}</div>
-        <div class="resume-info">
-            <div class="resume-name">{{ r.full_name or 'Unnamed Resume' }}</div>
-            <div class="resume-email">{{ r.email or '' }}</div>
-        </div>
-        <div class="resume-date">{{ r.created_at[:10] if r.created_at else '' }}</div>
-        <div class="resume-actions">
-            <a href="{{ url_for('view_resume', resume_id=r.id) }}" class="btn btn-sm btn-ghost">View</a>
-            <a href="{{ url_for('edit_resume', resume_id=r.id) }}" class="btn btn-sm btn-ghost">Edit</a>
-        </div>
-    </div>
-    {% endfor %}
-</div>
-{% endif %}
-{% endblock %}
-""",
-    'templates/resume_builder.html': r"""{% extends "base.html" %}
-{% block title %}Resume Builder{% endblock %}
-{% block page_title %}{% if edit %}Edit Resume{% else %}Build New Resume{% endif %}{% endblock %}
-
-{% block content %}
-<form method="POST" id="resumeForm">
-
-<!-- Personal Information -->
-<div class="form-card">
-    <div class="form-card-header">
-        <div class="form-card-icon">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                <circle cx="12" cy="7" r="4"/>
-            </svg>
-        </div>
-        <div>
-            <h2 class="form-card-title">Personal Information</h2>
-            <p class="form-card-sub">Your basic contact details</p>
-        </div>
-    </div>
-    <div class="form-grid form-grid-2">
-        <div class="form-group">
-            <label for="full_name">Full Name <span class="required">*</span></label>
-            <input type="text" id="full_name" name="full_name" class="form-input"
-                placeholder="e.g., Devadharshini R" required
-                value="{{ resume.full_name if resume else '' }}">
-        </div>
-        <div class="form-group">
-            <label for="email">Email Address <span class="required">*</span></label>
-            <input type="email" id="email" name="email" class="form-input"
-                placeholder="you@email.com" required
-                value="{{ resume.email if resume else '' }}">
-        </div>
-        <div class="form-group">
-            <label for="phone">Phone Number</label>
-            <input type="text" id="phone" name="phone" class="form-input"
-                placeholder="+91 98765 43210"
-                value="{{ resume.phone if resume else '' }}">
-        </div>
-        <div class="form-group">
-            <label for="location">Location</label>
-            <input type="text" id="location" name="location" class="form-input"
-                placeholder="Chennai, Tamil Nadu"
-                value="{{ resume.location if resume else '' }}">
-        </div>
-        <div class="form-group">
-            <label for="linkedin">LinkedIn Profile URL</label>
-            <input type="url" id="linkedin" name="linkedin" class="form-input"
-                placeholder="https://linkedin.com/in/yourprofile"
-                value="{{ resume.linkedin if resume else '' }}">
-        </div>
-        <div class="form-group">
-            <label for="portfolio">Portfolio / GitHub URL</label>
-            <input type="url" id="portfolio" name="portfolio" class="form-input"
-                placeholder="https://github.com/yourname"
-                value="{{ resume.portfolio if resume else '' }}">
-        </div>
-    </div>
-    <div class="form-group">
-        <label for="summary">Professional Summary</label>
-        <textarea id="summary" name="summary" class="form-textarea" rows="3"
-            placeholder="Write a compelling 2-3 sentence summary of your professional background, key skills, and career goals...">{{ resume.summary if resume else '' }}</textarea>
-    </div>
-</div>
-
-<!-- Education -->
-<div class="form-card">
-    <div class="form-card-header">
-        <div class="form-card-icon">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
-                <path d="M6 12v5c3 3 9 3 12 0v-5"/>
-            </svg>
-        </div>
-        <div>
-            <h2 class="form-card-title">Education</h2>
-            <p class="form-card-sub">Academic qualifications</p>
-        </div>
-    </div>
-    <div id="educationList">
-        {% if resume and resume.education %}
-            {% for edu in resume.education %}
-            <div class="dynamic-row" data-row="education">
-                <div class="form-grid form-grid-4">
-                    <div class="form-group">
-                        <label>Degree / Course</label>
-                        <input type="text" name="edu_degree" class="form-input" placeholder="MCA / B.Sc. CS" value="{{ edu.degree }}">
-                    </div>
-                    <div class="form-group">
-                        <label>Institution</label>
-                        <input type="text" name="edu_institution" class="form-input" placeholder="University Name" value="{{ edu.institution }}">
-                    </div>
-                    <div class="form-group">
-                        <label>Year</label>
-                        <input type="text" name="edu_year" class="form-input" placeholder="2022 – 2024" value="{{ edu.year }}">
-                    </div>
-                    <div class="form-group">
-                        <label>Grade / CGPA</label>
-                        <input type="text" name="edu_grade" class="form-input" placeholder="8.5 CGPA" value="{{ edu.grade }}">
-                    </div>
-                </div>
-                <button type="button" class="btn-remove" onclick="removeRow(this)">✕ Remove</button>
-            </div>
-            {% endfor %}
-        {% else %}
-        <div class="dynamic-row" data-row="education">
-            <div class="form-grid form-grid-4">
-                <div class="form-group">
-                    <label>Degree / Course</label>
-                    <input type="text" name="edu_degree" class="form-input" placeholder="MCA / B.Sc. CS">
-                </div>
-                <div class="form-group">
-                    <label>Institution</label>
-                    <input type="text" name="edu_institution" class="form-input" placeholder="University Name">
-                </div>
-                <div class="form-group">
-                    <label>Year</label>
-                    <input type="text" name="edu_year" class="form-input" placeholder="2022 – 2024">
-                </div>
-                <div class="form-group">
-                    <label>Grade / CGPA</label>
-                    <input type="text" name="edu_grade" class="form-input" placeholder="8.5 CGPA">
-                </div>
-            </div>
-            <button type="button" class="btn-remove" onclick="removeRow(this)">✕ Remove</button>
-        </div>
-        {% endif %}
-    </div>
-    <button type="button" class="btn btn-ghost btn-sm" onclick="addEducation()">+ Add Education</button>
-</div>
-
-<!-- Work Experience -->
-<div class="form-card">
-    <div class="form-card-header">
-        <div class="form-card-icon">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
-                <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
-            </svg>
-        </div>
-        <div>
-            <h2 class="form-card-title">Work Experience</h2>
-            <p class="form-card-sub">Jobs, internships, and roles</p>
-        </div>
-    </div>
-    <div id="experienceList">
-        {% if resume and resume.experience %}
-            {% for exp in resume.experience %}
-            <div class="dynamic-row" data-row="experience">
-                <div class="form-grid form-grid-3">
-                    <div class="form-group">
-                        <label>Job Title / Role</label>
-                        <input type="text" name="exp_role" class="form-input" placeholder="Software Tester" value="{{ exp.role }}">
-                    </div>
-                    <div class="form-group">
-                        <label>Company</label>
-                        <input type="text" name="exp_company" class="form-input" placeholder="Company Name" value="{{ exp.company }}">
-                    </div>
-                    <div class="form-group">
-                        <label>Duration</label>
-                        <input type="text" name="exp_duration" class="form-input" placeholder="Jun 2023 – Present" value="{{ exp.duration }}">
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label>Responsibilities &amp; Achievements</label>
-                    <textarea name="exp_description" class="form-textarea" rows="3"
-                        placeholder="• Designed and executed manual test cases for web applications&#10;• Automated regression tests using Selenium and Java&#10;• Reduced bug escape rate by 30%">{{ exp.description }}</textarea>
-                </div>
-                <button type="button" class="btn-remove" onclick="removeRow(this)">✕ Remove</button>
-            </div>
-            {% endfor %}
-        {% else %}
-        <div class="dynamic-row" data-row="experience">
-            <div class="form-grid form-grid-3">
-                <div class="form-group">
-                    <label>Job Title / Role</label>
-                    <input type="text" name="exp_role" class="form-input" placeholder="Software Tester">
-                </div>
-                <div class="form-group">
-                    <label>Company</label>
-                    <input type="text" name="exp_company" class="form-input" placeholder="Company Name">
-                </div>
-                <div class="form-group">
-                    <label>Duration</label>
-                    <input type="text" name="exp_duration" class="form-input" placeholder="Jun 2023 – Present">
-                </div>
-            </div>
-            <div class="form-group">
-                <label>Responsibilities &amp; Achievements</label>
-                <textarea name="exp_description" class="form-textarea" rows="3"
-                    placeholder="• Describe your responsibilities and achievements (one per line)..."></textarea>
-            </div>
-            <button type="button" class="btn-remove" onclick="removeRow(this)">✕ Remove</button>
-        </div>
-        {% endif %}
-    </div>
-    <button type="button" class="btn btn-ghost btn-sm" onclick="addExperience()">+ Add Experience</button>
-</div>
-
-<!-- Skills -->
-<div class="form-card">
-    <div class="form-card-header">
-        <div class="form-card-icon">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
-            </svg>
-        </div>
-        <div>
-            <h2 class="form-card-title">Skills</h2>
-            <p class="form-card-sub">Technical and soft skills — comma or newline separated</p>
-        </div>
-    </div>
-    <div class="form-group">
-        <textarea id="skills" name="skills" class="form-textarea" rows="4"
-            placeholder="Python, Java, SQL, Selenium, Manual Testing, Agile, JIRA, Git, HTML, CSS">{{ resume.skills if resume else '' }}</textarea>
-        <div class="form-hint">Tip: Include skills that match the job descriptions you're targeting</div>
-    </div>
-</div>
-
-<!-- Projects -->
-<div class="form-card">
-    <div class="form-card-header">
-        <div class="form-card-icon">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/>
-                <path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/>
-                <path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/>
-                <path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/>
-            </svg>
-        </div>
-        <div>
-            <h2 class="form-card-title">Projects</h2>
-            <p class="form-card-sub">Academic, personal, or professional projects</p>
-        </div>
-    </div>
-    <div id="projectList">
-        {% if resume and resume.projects %}
-            {% for proj in resume.projects %}
-            <div class="dynamic-row" data-row="project">
-                <div class="form-grid form-grid-2">
-                    <div class="form-group">
-                        <label>Project Title</label>
-                        <input type="text" name="proj_title" class="form-input" placeholder="ATS Resume Builder" value="{{ proj.title }}">
-                    </div>
-                    <div class="form-group">
-                        <label>Technologies Used</label>
-                        <input type="text" name="proj_tech" class="form-input" placeholder="Python, Flask, SQLite" value="{{ proj.tech }}">
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label>Description</label>
-                    <textarea name="proj_description" class="form-textarea" rows="2"
-                        placeholder="Brief description of the project and your contribution...">{{ proj.description }}</textarea>
-                </div>
-                <button type="button" class="btn-remove" onclick="removeRow(this)">✕ Remove</button>
-            </div>
-            {% endfor %}
-        {% else %}
-        <div class="dynamic-row" data-row="project">
-            <div class="form-grid form-grid-2">
-                <div class="form-group">
-                    <label>Project Title</label>
-                    <input type="text" name="proj_title" class="form-input" placeholder="ATS Resume Builder">
-                </div>
-                <div class="form-group">
-                    <label>Technologies Used</label>
-                    <input type="text" name="proj_tech" class="form-input" placeholder="Python, Flask, SQLite">
-                </div>
-            </div>
-            <div class="form-group">
-                <label>Description</label>
-                <textarea name="proj_description" class="form-textarea" rows="2"
-                    placeholder="Brief description of the project and your contribution..."></textarea>
-            </div>
-            <button type="button" class="btn-remove" onclick="removeRow(this)">✕ Remove</button>
-        </div>
-        {% endif %}
-    </div>
-    <button type="button" class="btn btn-ghost btn-sm" onclick="addProject()">+ Add Project</button>
-</div>
-
-<!-- Certifications -->
-<div class="form-card">
-    <div class="form-card-header">
-        <div class="form-card-icon">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="8" r="7"/>
-                <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/>
-            </svg>
-        </div>
-        <div>
-            <h2 class="form-card-title">Certifications &amp; Achievements</h2>
-            <p class="form-card-sub">One per line</p>
-        </div>
-    </div>
-    <div class="form-group">
-        <textarea id="certifications" name="certifications" class="form-textarea" rows="4"
-            placeholder="AWS Certified Cloud Practitioner — 2024&#10;Selenium WebDriver with Java — Udemy&#10;Postman API Testing — Coursera">{{ resume.certifications if resume else '' }}</textarea>
-    </div>
-</div>
-
-<!-- Submit -->
-<div class="form-actions">
-    <a href="{{ url_for('dashboard') }}" class="btn btn-ghost">Cancel</a>
-    <button type="submit" class="btn btn-primary btn-lg" id="saveBtn">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
-            <polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/>
-        </svg>
-        {% if edit %}Update Resume{% else %}Save Resume{% endif %}
-    </button>
-</div>
-
-</form>
-{% endblock %}
-
-{% block scripts %}
-<script src="{{ url_for('static', filename='js/resume_builder.js') }}"></script>
-{% endblock %}
-""",
-    'templates/interview_prep.html': r"""{% extends "base.html" %}
-{% block title %}Interview Preparation{% endblock %}
-{% block page_title %}Interview Question Generator{% endblock %}
-
-{% block content %}
-<div class="interview-layout">
-    <!-- Input Panel -->
-    <div class="interview-input">
-        <div class="form-card">
-            <div class="form-card-header">
-                <div class="form-card-icon">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-                    </svg>
-                </div>
-                <div>
-                    <h2 class="form-card-title">Generate Questions</h2>
-                    <p class="form-card-sub">AI-powered from your job description</p>
-                </div>
-            </div>
-            <form method="POST">
-                <div class="form-group">
-                    <label for="resume_id">Reference Resume (optional)</label>
-                    <select id="resume_id" name="resume_id" class="form-select">
-                        <option value="">-- None --</option>
-                        {% for r in resume_list %}
-                        <option value="{{ r.id }}">{{ r.full_name }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="job_description">Job Description <span class="required">*</span></label>
-                    <textarea id="job_description" name="job_description" class="form-textarea" rows="12"
-                        placeholder="Paste the job description here...&#10;&#10;The more detailed, the more relevant questions you'll get!" required>{{ request.form.get('job_description', '') }}</textarea>
-                </div>
-                <button type="submit" class="btn btn-primary btn-lg w-full">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-                    </svg>
-                    Generate Questions
-                </button>
-            </form>
-
-            {% if not questions %}
-            <div class="interview-tips-box">
-                <h4>Pro Tips:</h4>
-                <ol>
-                    <li>Paste the job description</li>
-                    <li>Get HR, technical &amp; situational questions</li>
-                    <li>Expand each question to see a model answer</li>
-                    <li>Practice out loud before your interview!</li>
-                </ol>
-            </div>
-            {% endif %}
-        </div>
-    </div>
-
-    <!-- Questions Panel -->
-    <div class="interview-questions">
-        {% if questions %}
-        <div class="questions-header">
-            <div class="questions-count-chips">
-                <span class="count-chip chip-hr">{{ questions.hr|length }} HR</span>
-                <span class="count-chip chip-tech">{{ questions.technical|length }} Technical</span>
-                <span class="count-chip chip-sit">{{ questions.situational|length }} Situational</span>
-            </div>
-            {% if questions.role_hints %}
-            <div class="role-hints">
-                Role detected: {% for r in questions.role_hints %}<span class="role-tag">{{ r }}</span>{% endfor %}
-            </div>
-            {% endif %}
-        </div>
-
-        <!-- Technical Questions -->
-        <div class="q-section">
-            <h3 class="q-section-title">
-                <span class="q-section-icon">🛠️</span>
-                Technical Questions
-                <span class="q-count">{{ questions.technical|length }}</span>
-            </h3>
-            <div class="q-list">
-                {% for q in questions.technical %}
-                <div class="q-item" onclick="toggleAnswer(this)">
-                    <div class="q-header">
-                        <div class="q-skill-tag">{{ q.skill }}</div>
-                        <div class="q-text">{{ q.question }}</div>
-                        <div class="q-toggle">▼</div>
-                    </div>
-                    <div class="q-answer">
-                        <div class="q-answer-label">💡 Model Answer</div>
-                        <p>{{ q.answer }}</p>
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-        </div>
-
-        <!-- HR Questions -->
-        <div class="q-section">
-            <h3 class="q-section-title">
-                <span class="q-section-icon">👔</span>
-                HR & Behavioral Questions
-                <span class="q-count">{{ questions.hr|length }}</span>
-            </h3>
-            <div class="q-list">
-                {% for q, a in questions.hr %}
-                <div class="q-item" onclick="toggleAnswer(this)">
-                    <div class="q-header">
-                        <div class="q-skill-tag">HR</div>
-                        <div class="q-text">{{ q }}</div>
-                        <div class="q-toggle">▼</div>
-                    </div>
-                    <div class="q-answer">
-                        <div class="q-answer-label">💡 How to Answer</div>
-                        <p>{{ a }}</p>
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-        </div>
-
-        <!-- Situational Questions -->
-        <div class="q-section">
-            <h3 class="q-section-title">
-                <span class="q-section-icon">🧩</span>
-                Situational Questions
-                <span class="q-count">{{ questions.situational|length }}</span>
-            </h3>
-            <div class="q-list">
-                {% for q, a in questions.situational %}
-                <div class="q-item" onclick="toggleAnswer(this)">
-                    <div class="q-header">
-                        <div class="q-skill-tag">Situational</div>
-                        <div class="q-text">{{ q }}</div>
-                        <div class="q-toggle">▼</div>
-                    </div>
-                    <div class="q-answer">
-                        <div class="q-answer-label">💡 How to Approach</div>
-                        <p>{{ a }}</p>
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-        </div>
-
-        <div class="interview-actions">
-            <button onclick="expandAll()" class="btn btn-ghost btn-sm">Expand All Answers</button>
-            <button onclick="collapseAll()" class="btn btn-ghost btn-sm">Collapse All</button>
-        </div>
-
-        {% else %}
-        <!-- Placeholder -->
-        <div class="ats-placeholder">
-            <div class="placeholder-icon">🤔</div>
-            <h3>Questions will appear here</h3>
-            <p>Paste a job description and click <strong>Generate Questions</strong> to get personalized interview questions organized by category, with model answers to help you practice.</p>
-        </div>
-        {% endif %}
-    </div>
-</div>
-{% endblock %}
-
-{% block scripts %}
-<script>
-function toggleAnswer(item) {
-    item.classList.toggle('open');
-    const toggle = item.querySelector('.q-toggle');
-    toggle.textContent = item.classList.contains('open') ? '▲' : '▼';
-}
-
-function expandAll() {
-    document.querySelectorAll('.q-item').forEach(item => {
-        item.classList.add('open');
-        item.querySelector('.q-toggle').textContent = '▲';
-    });
-}
-
-function collapseAll() {
-    document.querySelectorAll('.q-item').forEach(item => {
-        item.classList.remove('open');
-        item.querySelector('.q-toggle').textContent = '▼';
-    });
-}
-</script>
-{% endblock %}
-""",
-    'templates/templates_page.html': r"""{% extends "base.html" %}
-{% block title %}Resume Templates{% endblock %}
-{% block page_title %}Resume Templates & PDF Download{% endblock %}
-
-{% block content %}
-<div class="templates-layout">
-    <!-- Template Selector -->
-    <div class="templates-grid-panel">
-        <div class="section-header">
-            <h2 class="section-title">Choose a Template</h2>
-            <p class="section-sub">Select a professional template that suits your target role</p>
-        </div>
-
-        <div class="template-cards">
-            <!-- Modern Template -->
-            <div class="template-card" id="tpl-modern" onclick="selectTemplate('modern')">
-                <div class="template-preview modern-preview">
-                    <div class="tpl-header-bar"></div>
-                    <div class="tpl-name-block"></div>
-                    <div class="tpl-line tpl-line-wide"></div>
-                    <div class="tpl-line tpl-line-medium"></div>
-                    <div class="tpl-divider"></div>
-                    <div class="tpl-line"></div>
-                    <div class="tpl-line tpl-line-wide"></div>
-                    <div class="tpl-line"></div>
-                    <div class="tpl-line tpl-line-medium"></div>
-                </div>
-                <div class="template-card-info">
-                    <div class="template-name">Modern</div>
-                    <div class="template-desc">Clean layout with royal purple header. High ATS ranking.</div>
-                    <span class="template-badge tpl-badge-modern">Popular</span>
-                </div>
-                <div class="template-check" id="check-modern"></div>
-            </div>
-
-            <!-- Classic Template -->
-            <div class="template-card" id="tpl-classic" onclick="selectTemplate('classic')">
-                <div class="template-preview classic-preview">
-                    <div class="tpl-classic-header"></div>
-                    <div class="tpl-line tpl-line-wide"></div>
-                    <div class="tpl-line"></div>
-                    <div class="tpl-classic-rule"></div>
-                    <div class="tpl-line tpl-line-wide"></div>
-                    <div class="tpl-line tpl-line-medium"></div>
-                    <div class="tpl-classic-rule"></div>
-                    <div class="tpl-line"></div>
-                    <div class="tpl-line tpl-line-wide"></div>
-                </div>
-                <div class="template-card-info">
-                    <div class="template-name">Classic</div>
-                    <div class="template-desc">Traditional single-column format. Ideal for formal industries.</div>
-                    <span class="template-badge tpl-badge-classic">Professional</span>
-                </div>
-                <div class="template-check" id="check-classic"></div>
-            </div>
-
-            <!-- Minimal Template -->
-            <div class="template-card" id="tpl-minimal" onclick="selectTemplate('minimal')">
-                <div class="template-preview minimal-preview">
-                    <div class="tpl-min-name"></div>
-                    <div class="tpl-line tpl-line-medium"></div>
-                    <div style="height:8px"></div>
-                    <div class="tpl-min-section"></div>
-                    <div class="tpl-line tpl-line-wide"></div>
-                    <div class="tpl-line"></div>
-                    <div class="tpl-min-section"></div>
-                    <div class="tpl-line tpl-line-wide"></div>
-                    <div class="tpl-line tpl-line-medium"></div>
-                </div>
-                <div class="template-card-info">
-                    <div class="template-name">Minimal</div>
-                    <div class="template-desc">Ultra-clean minimalist design. Modern and ATS-friendly.</div>
-                    <span class="template-badge tpl-badge-minimal">ATS-Friendly</span>
-                </div>
-                <div class="template-check" id="check-minimal"></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Download Panel -->
-    <div class="download-panel">
-        <div class="form-card">
-            <div class="form-card-header">
-                <div class="form-card-icon">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                        <polyline points="14 2 14 8 20 8"/>
-                        <line x1="16" y1="13" x2="8" y2="13"/>
-                        <line x1="16" y1="17" x2="8" y2="17"/>
-                    </svg>
-                </div>
-                <div>
-                    <h2 class="form-card-title">Generate PDF</h2>
-                    <p class="form-card-sub">Select resume and template, then download</p>
-                </div>
-            </div>
-
-            <form method="POST" action="{{ url_for('download_pdf') }}" id="pdfForm">
-                <input type="hidden" name="template_name" id="selectedTemplate" value="modern">
-
-                <div class="form-group">
-                    <label for="resume_id">Select Resume</label>
-                    <select id="resume_id" name="resume_id" class="form-select" required>
-                        <option value="">-- Select a resume --</option>
-                        {% for r in resume_list %}
-                        <option value="{{ r.id }}">{{ r.full_name }} ({{ r.email }})</option>
-                        {% endfor %}
-                    </select>
-                    {% if not resume_list %}
-                    <div class="form-hint">No resumes saved yet. <a href="{{ url_for('resume_builder') }}">Create one first →</a></div>
-                    {% endif %}
-                </div>
-
-                <div class="selected-template-display">
-                    <div class="std-label">Selected Template:</div>
-                    <div class="std-name" id="selectedTemplateName">Modern</div>
-                </div>
-
-                <button type="submit" class="btn btn-primary btn-lg w-full" id="downloadBtn">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                        <polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
-                    </svg>
-                    Download PDF Resume
-                </button>
-            </form>
-
-            <div class="download-tips">
-                <h4>📌 PDF Tips</h4>
-                <ul>
-                    <li>Fill out your resume completely before downloading</li>
-                    <li>Modern template is best for tech/IT roles</li>
-                    <li>Classic template is best for formal sectors (banking, gov)</li>
-                    <li>Minimal template has the highest ATS compatibility</li>
-                    <li>PDF is generated with all sections you filled in the builder</li>
-                </ul>
-            </div>
-        </div>
-    </div>
-</div>
-{% endblock %}
-
-{% block scripts %}
-<script>
-let selectedTemplate = 'modern';
-
-function selectTemplate(name) {
-    // Remove all active states
-    document.querySelectorAll('.template-card').forEach(c => c.classList.remove('active'));
-    document.querySelectorAll('.template-check').forEach(c => c.classList.remove('visible'));
-
-    // Set active
-    document.getElementById('tpl-' + name).classList.add('active');
-    document.getElementById('check-' + name).classList.add('visible');
-    document.getElementById('selectedTemplate').value = name;
-
-    const names = { modern: 'Modern', classic: 'Classic', minimal: 'Minimal' };
-    document.getElementById('selectedTemplateName').textContent = names[name];
-    selectedTemplate = name;
-}
-
-// Default selection
-selectTemplate('modern');
-</script>
-{% endblock %}
-""",
-    'static/js/resume_builder.js': r"""// ── Resume Builder — Dynamic Form Functions ────────────────────────────────────
+    'static/js/resume_builder.js': r"""
+// === Resume Builder - Dynamic Form Functions ==================================
 
 function addEducation() {
     const list = document.getElementById('educationList');
@@ -4053,14 +5100,14 @@ function addEducation() {
             </div>
             <div class="form-group">
                 <label>Year</label>
-                <input type="text" name="edu_year" class="form-input" placeholder="2022 – 2024">
+                <input type="text" name="edu_year" class="form-input" placeholder="2022 - 2024">
             </div>
             <div class="form-group">
                 <label>Grade / CGPA</label>
                 <input type="text" name="edu_grade" class="form-input" placeholder="8.5 CGPA">
             </div>
         </div>
-        <button type="button" class="btn-remove" onclick="removeRow(this)">✕ Remove</button>
+        <button type="button" class="btn-remove" onclick="removeRow(this)">&times; Remove</button>
     `;
     list.appendChild(row);
     row.querySelector('input').focus();
@@ -4084,15 +5131,15 @@ function addExperience() {
             </div>
             <div class="form-group">
                 <label>Duration</label>
-                <input type="text" name="exp_duration" class="form-input" placeholder="Jun 2023 – Present">
+                <input type="text" name="exp_duration" class="form-input" placeholder="Jun 2023 - Present">
             </div>
         </div>
         <div class="form-group">
             <label>Responsibilities & Achievements</label>
             <textarea name="exp_description" class="form-textarea" rows="3"
-                placeholder="• Describe your responsibilities and achievements (one per line)..."></textarea>
+                placeholder="- Describe your responsibilities and achievements (one per line)..."></textarea>
         </div>
-        <button type="button" class="btn-remove" onclick="removeRow(this)">✕ Remove</button>
+        <button type="button" class="btn-remove" onclick="removeRow(this)">&times; Remove</button>
     `;
     list.appendChild(row);
     row.querySelector('input').focus();
@@ -4119,7 +5166,7 @@ function addProject() {
             <textarea name="proj_description" class="form-textarea" rows="2"
                 placeholder="Brief description of the project and your contribution..."></textarea>
         </div>
-        <button type="button" class="btn-remove" onclick="removeRow(this)">✕ Remove</button>
+        <button type="button" class="btn-remove" onclick="removeRow(this)">&times; Remove</button>
     `;
     list.appendChild(row);
     row.querySelector('input').focus();
@@ -4133,7 +5180,7 @@ function removeRow(btn) {
     setTimeout(() => row.remove(), 200);
 }
 
-// ── Form validation ───────────────────────────────────────────────────────────
+// === Form validation ==========================================================
 document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('resumeForm');
     if (!form) return;
@@ -4148,487 +5195,58 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 """,
-    'templates/tracker.html': r"""{% extends "base.html" %}
-{% block title %}Job Application Tracker{% endblock %}
-{% block page_title %}Job Application Tracker{% endblock %}
+    'static/js/tracker.js': r"""
+// === Job Tracker JavaScript ===================================================
 
-{% block content %}
-<!-- Stats Row -->
-<div class="stats-grid">
-    <div class="stat-card">
-        <div class="stat-icon stat-icon-purple">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
-                <polyline points="22,6 12,13 2,6"/>
-            </svg>
-        </div>
-        <div class="stat-info">
-            <div class="stat-value">{{ stats.total }}</div>
-            <div class="stat-label">Total Applied</div>
-        </div>
-    </div>
-    <div class="stat-card">
-        <div class="stat-icon stat-icon-blue">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-                <line x1="16" y1="2" x2="16" y2="6"/>
-                <line x1="8" y1="2" x2="8" y2="6"/>
-                <line x1="3" y1="10" x2="21" y2="10"/>
-            </svg>
-        </div>
-        <div class="stat-info">
-            <div class="stat-value">{{ stats.by_status.get('Interview', 0) }}</div>
-            <div class="stat-label">Interviews</div>
-        </div>
-    </div>
-    <div class="stat-card">
-        <div class="stat-icon stat-icon-green">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-                <polyline points="22 4 12 14.01 9 11.01"/>
-            </svg>
-        </div>
-        <div class="stat-info">
-            <div class="stat-value">{{ stats.by_status.get('Offer', 0) }}</div>
-            <div class="stat-label">Offers</div>
-        </div>
-    </div>
-    <div class="stat-card">
-        <div class="stat-icon stat-icon-red">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10"/>
-                <line x1="15" y1="9" x2="9" y2="15"/>
-                <line x1="9" y1="9" x2="15" y2="15"/>
-            </svg>
-        </div>
-        <div class="stat-info">
-            <div class="stat-value">{{ stats.by_status.get('Rejected', 0) }}</div>
-            <div class="stat-label">Rejected</div>
-        </div>
-    </div>
-</div>
+function filterTable() {
+    const search = document.getElementById('filterSearch').value.toLowerCase();
+    const status = document.getElementById('filterStatus').value;
+    const rows = document.querySelectorAll('.app-row');
 
-<div class="tracker-layout">
-    <!-- Add Application Form -->
-    <div class="tracker-form-panel">
-        <div class="form-card">
-            <div class="form-card-header">
-                <div class="form-card-icon">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="12" y1="5" x2="12" y2="19"/>
-                        <line x1="5" y1="12" x2="19" y2="12"/>
-                    </svg>
-                </div>
-                <div>
-                    <h2 class="form-card-title">Add Application</h2>
-                    <p class="form-card-sub">Track a new job application</p>
-                </div>
-            </div>
-            <form method="POST" action="{{ url_for('add_application') }}" id="addAppForm">
-                <div class="form-group">
-                    <label for="company">Company Name <span class="required">*</span></label>
-                    <input type="text" id="company" name="company" class="form-input" placeholder="e.g., TCS, Infosys, Google" required>
-                </div>
-                <div class="form-group">
-                    <label for="role">Job Role <span class="required">*</span></label>
-                    <input type="text" id="role" name="role" class="form-input" placeholder="e.g., Software Test Engineer" required>
-                </div>
-                <div class="form-grid form-grid-2">
-                    <div class="form-group">
-                        <label for="date_applied">Date Applied</label>
-                        <input type="date" id="date_applied" name="date_applied" class="form-input">
-                    </div>
-                    <div class="form-group">
-                        <label for="status">Status</label>
-                        <select id="status" name="status" class="form-select">
-                            <option value="Applied">Applied</option>
-                            <option value="Interview">Interview</option>
-                            <option value="Offer">Offer</option>
-                            <option value="Rejected">Rejected</option>
-                            <option value="Withdrawn">Withdrawn</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="form-grid form-grid-2">
-                    <div class="form-group">
-                        <label for="location">Location</label>
-                        <input type="text" id="location" name="location" class="form-input" placeholder="Chennai / Remote">
-                    </div>
-                    <div class="form-group">
-                        <label for="salary">Salary (LPA)</label>
-                        <input type="text" id="salary" name="salary" class="form-input" placeholder="e.g., 6 LPA">
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="job_url">Job URL</label>
-                    <input type="url" id="job_url" name="job_url" class="form-input" placeholder="https://...">
-                </div>
-                <div class="form-group">
-                    <label for="notes">Notes</label>
-                    <textarea id="notes" name="notes" class="form-textarea" rows="3" placeholder="Referral, recruiter name, follow-up date..."></textarea>
-                </div>
-                <button type="submit" class="btn btn-primary w-full">Add Application</button>
-            </form>
-        </div>
-    </div>
+    rows.forEach(row => {
+        const company = row.dataset.company || '';
+        const role = row.dataset.role || '';
+        const rowStatus = row.dataset.status || '';
 
-    <!-- Applications Table -->
-    <div class="tracker-table-panel">
-        <!-- Filters -->
-        <div class="tracker-filters">
-            <input type="text" id="filterSearch" class="form-input" placeholder="🔍 Search company or role..." oninput="filterTable()">
-            <select id="filterStatus" class="form-select" onchange="filterTable()">
-                <option value="">All Statuses</option>
-                <option value="Applied">Applied</option>
-                <option value="Interview">Interview</option>
-                <option value="Offer">Offer</option>
-                <option value="Rejected">Rejected</option>
-                <option value="Withdrawn">Withdrawn</option>
-            </select>
-        </div>
+        const matchSearch = !search || company.includes(search) || role.includes(search);
+        const matchStatus = !status || rowStatus === status;
 
-        {% if applications %}
-        <div class="tracker-table-wrapper">
-            <table class="tracker-table" id="appTable">
-                <thead>
-                    <tr>
-                        <th>Company</th>
-                        <th>Role</th>
-                        <th>Date</th>
-                        <th>Status</th>
-                        <th>Location</th>
-                        <th>Notes</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for app in applications %}
-                    <tr class="app-row" data-company="{{ app.company|lower }}" data-role="{{ app.role|lower }}" data-status="{{ app.status }}">
-                        <td class="app-company">
-                            <div class="company-avatar">{{ app.company[0].upper() }}</div>
-                            <div>
-                                <div class="company-name">{{ app.company }}</div>
-                                {% if app.job_url %}<a href="{{ app.job_url }}" target="_blank" class="job-link">View Job ↗</a>{% endif %}
-                            </div>
-                        </td>
-                        <td class="app-role">{{ app.role }}</td>
-                        <td>{{ app.date_applied or '—' }}</td>
-                        <td>
-                            <span class="status-badge status-{{ app.status|lower }}">
-                                {{ app.status }}
-                            </span>
-                        </td>
-                        <td>{{ app.location or '—' }}</td>
-                        <td class="app-notes">{{ app.notes or '—' }}</td>
-                        <td class="app-actions">
-                            <button class="btn btn-sm btn-ghost" onclick="openEditModal({{ app.id }}, '{{ app.company }}', '{{ app.role }}', '{{ app.date_applied }}', '{{ app.status }}', '{{ app.location }}', '{{ app.salary }}', '{{ app.job_url }}', {{ ('`' + app.notes + '`') if app.notes else 'null' }})">Edit</button>
-                            <form method="POST" action="{{ url_for('delete_application', app_id=app.id) }}" style="display:inline" onsubmit="return confirm('Delete this application?')">
-                                <button type="submit" class="btn btn-sm btn-danger">Delete</button>
-                            </form>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        {% else %}
-        <div class="ats-placeholder">
-            <div class="placeholder-icon">📋</div>
-            <h3>No Applications Yet</h3>
-            <p>Add your first job application using the form on the left. Track every company you apply to and monitor your progress.</p>
-        </div>
-        {% endif %}
-    </div>
-</div>
-
-<!-- Edit Modal -->
-<div class="modal-overlay" id="editModal">
-    <div class="modal">
-        <div class="modal-header">
-            <h3>Edit Application</h3>
-            <button onclick="closeEditModal()" class="modal-close">✕</button>
-        </div>
-        <form method="POST" id="editForm">
-            <div class="form-grid form-grid-2">
-                <div class="form-group">
-                    <label>Company</label>
-                    <input type="text" name="company" id="edit_company" class="form-input" required>
-                </div>
-                <div class="form-group">
-                    <label>Role</label>
-                    <input type="text" name="role" id="edit_role" class="form-input" required>
-                </div>
-                <div class="form-group">
-                    <label>Date Applied</label>
-                    <input type="date" name="date_applied" id="edit_date" class="form-input">
-                </div>
-                <div class="form-group">
-                    <label>Status</label>
-                    <select name="status" id="edit_status" class="form-select">
-                        <option value="Applied">Applied</option>
-                        <option value="Interview">Interview</option>
-                        <option value="Offer">Offer</option>
-                        <option value="Rejected">Rejected</option>
-                        <option value="Withdrawn">Withdrawn</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Location</label>
-                    <input type="text" name="location" id="edit_location" class="form-input">
-                </div>
-                <div class="form-group">
-                    <label>Salary</label>
-                    <input type="text" name="salary" id="edit_salary" class="form-input">
-                </div>
-            </div>
-            <div class="form-group">
-                <label>Job URL</label>
-                <input type="url" name="job_url" id="edit_job_url" class="form-input">
-            </div>
-            <div class="form-group">
-                <label>Notes</label>
-                <textarea name="notes" id="edit_notes" class="form-textarea" rows="3"></textarea>
-            </div>
-            <div class="modal-actions">
-                <button type="button" onclick="closeEditModal()" class="btn btn-ghost">Cancel</button>
-                <button type="submit" class="btn btn-primary">Save Changes</button>
-            </div>
-        </form>
-    </div>
-</div>
-{% endblock %}
-
-{% block scripts %}
-<script src="{{ url_for('static', filename='js/tracker.js') }}"></script>
-{% endblock %}
-""",
-    'templates/ats_analyzer.html': r"""{% extends "base.html" %}
-{% block title %}ATS Analyzer{% endblock %}
-{% block page_title %}ATS Match Analyzer{% endblock %}
-
-{% block content %}
-<div class="ats-layout">
-    <!-- Input Panel -->
-    <div class="ats-input-panel">
-        <div class="form-card">
-            <div class="form-card-header">
-                <div class="form-card-icon">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="10"/>
-                        <circle cx="12" cy="12" r="6"/>
-                        <circle cx="12" cy="12" r="2"/>
-                    </svg>
-                </div>
-                <div>
-                    <h2 class="form-card-title">Analyze Your Resume</h2>
-                    <p class="form-card-sub">Compare your resume against a job description</p>
-                </div>
-            </div>
-
-            <form method="POST" id="atsForm">
-                <!-- Resume Source Toggle -->
-                <div class="toggle-group">
-                    <button type="button" class="toggle-btn active" id="btnPaste" onclick="switchMode('paste')">Paste Text</button>
-                    <button type="button" class="toggle-btn" id="btnSaved" onclick="switchMode('saved')">Use Saved Resume</button>
-                </div>
-
-                <!-- Paste Mode -->
-                <div id="pasteMode">
-                    <div class="form-group">
-                        <label for="resume_text">Your Resume Text</label>
-                        <textarea id="resume_text" name="resume_text" class="form-textarea" rows="8"
-                            placeholder="Paste your full resume text here...&#10;&#10;Example:&#10;Software Tester with 2 years of experience in manual testing, Selenium, Java, SQL, and API testing. Proficient in Jira, Agile methodology, and functional testing. Experience with Python scripting for test automation."></textarea>
-                    </div>
-                </div>
-
-                <!-- Saved Resume Mode -->
-                <div id="savedMode" style="display:none;">
-                    <div class="form-group">
-                        <label for="resume_id">Select a Saved Resume</label>
-                        <select id="resume_id" name="resume_id" class="form-select">
-                            <option value="">-- Select Resume --</option>
-                            {% for r in resume_list %}
-                            <option value="{{ r.id }}">{{ r.full_name }} ({{ r.email }})</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="job_description">Job Description <span class="required">*</span></label>
-                    <textarea id="job_description" name="job_description" class="form-textarea" rows="10"
-                        placeholder="Paste the complete job description here...&#10;&#10;Example:&#10;We are looking for a Software Test Engineer with experience in manual testing, Selenium, Java, SQL, Python, API testing, and JIRA. The candidate should have knowledge of Agile methodology and regression testing." required></textarea>
-                </div>
-
-                <button type="submit" class="btn btn-primary btn-lg w-full" id="analyzeBtn">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-                    </svg>
-                    Analyze ATS Match
-                </button>
-            </form>
-        </div>
-    </div>
-
-    <!-- Results Panel -->
-    <div class="ats-results-panel">
-        {% if result %}
-            {% if result.error %}
-            <div class="alert alert-warning">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;">
-                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
-                    <line x1="12" y1="9" x2="12" y2="13"/>
-                    <line x1="12" y1="17" x2="12.01" y2="17"/>
-                </svg>
-                <span>{{ result.error }}</span>
-            </div>
-            {% else %}
-            <!-- Score Card -->
-            <div class="score-card-main">
-                <div class="score-label">ATS Match Score</div>
-                <div class="score-ring-container" id="scoreRingContainer">
-                    <svg class="score-ring" width="160" height="160" viewBox="0 0 160 160">
-                        <defs>
-                            <linearGradient id="purpleRingGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                                <stop offset="0%" stop-color="#9333ea"/>
-                                <stop offset="60%" stop-color="#c084fc"/>
-                                <stop offset="100%" stop-color="#f3e8ff"/>
-                            </linearGradient>
-                            <filter id="purpleRingGlow" x="-20%" y="-20%" width="140%" height="140%">
-                                <feDropShadow dx="0" dy="0" stdDeviation="4" flood-color="#a855f7" flood-opacity="0.6"/>
-                            </filter>
-                        </defs>
-                        <circle cx="80" cy="80" r="66" fill="none" stroke="rgba(168, 85, 247, 0.2)" stroke-width="12"/>
-                        <circle cx="80" cy="80" r="66" fill="none"
-                            stroke="url(#purpleRingGrad)"
-                            stroke-width="12"
-                            filter="url(#purpleRingGlow)"
-                            stroke-dasharray="{{ (result.score / 100 * 414.69)|round|int }} 414"
-                            stroke-linecap="round"
-                            transform="rotate(-90 80 80)"
-                            class="score-circle"
-                            id="scoreCircle"/>
-                    </svg>
-                    <div class="score-ring-center">
-                        <div class="score-number" id="scoreNumber">{{ result.score }}%</div>
-                        <div class="score-status {{ 'good' if result.score >= 70 else 'ok' if result.score >= 40 else 'low' }}">
-                            {{ 'Excellent' if result.score >= 70 else 'Good' if result.score >= 40 else 'Low' }}
-                        </div>
-                    </div>
-                </div>
-                <div class="score-meta">
-                    Matched <strong>{{ result.matched|length }}</strong> of <strong>{{ result.jd_skills|length }}</strong> skills
-                    &nbsp;·&nbsp; Keyword Density: <strong>{{ result.keyword_density }}%</strong>
-                </div>
-            </div>
-
-            <!-- Tips -->
-            {% if result.tips %}
-            <div class="tips-card">
-                <h3 class="tips-title">💡 Improvement Tips</h3>
-                <ul class="tips-list">
-                    {% for tip in result.tips %}
-                    <li>{{ tip }}</li>
-                    {% endfor %}
-                </ul>
-            </div>
-            {% endif %}
-
-            <!-- Matched Skills -->
-            <div class="skills-section">
-                <h3 class="skills-section-title skills-matched-title">
-                    ✅ Matched Skills ({{ result.matched|length }})
-                </h3>
-                <div class="skills-cloud">
-                    {% for skill, cat in result.matched.items() %}
-                    <span class="skill-badge skill-matched" title="{{ cat.replace('_',' ').title() }}">{{ skill }}</span>
-                    {% endfor %}
-                    {% if not result.matched %}
-                    <span class="skills-empty">No matched skills found</span>
-                    {% endif %}
-                </div>
-            </div>
-
-            <!-- Missing Skills -->
-            <div class="skills-section">
-                <h3 class="skills-section-title skills-missing-title">
-                    ❌ Missing Skills ({{ result.missing|length }})
-                </h3>
-                <div class="skills-cloud">
-                    {% for skill, cat in result.missing.items() %}
-                    <span class="skill-badge skill-missing" title="{{ cat.replace('_',' ').title() }}">{{ skill }}</span>
-                    {% endfor %}
-                    {% if not result.missing %}
-                    <span class="skills-empty">🎉 No skill gaps found!</span>
-                    {% endif %}
-                </div>
-            </div>
-
-            <!-- Skill Gap Analysis with Resources -->
-            {% if result.gap_analysis %}
-            <div class="gap-card">
-                <h3 class="gap-title">📚 Skill Gap — Learning Resources</h3>
-                <div class="gap-list">
-                    {% for gap in result.gap_analysis %}
-                    <div class="gap-item">
-                        <div class="gap-item-info">
-                            <span class="gap-skill">{{ gap.skill }}</span>
-                            <span class="gap-category">{{ gap.category }}</span>
-                        </div>
-                        <a href="{{ gap.resource }}" target="_blank" rel="noopener" class="btn btn-sm btn-outline">Learn →</a>
-                    </div>
-                    {% endfor %}
-                </div>
-            </div>
-            {% endif %}
-
-            <!-- Actions -->
-            <div class="ats-actions">
-                <a href="{{ url_for('interview_prep') }}" class="btn btn-primary">
-                    💬 Generate Interview Questions
-                </a>
-                <a href="{{ url_for('templates_page') }}" class="btn btn-outline">
-                    🎨 Download Resume PDF
-                </a>
-            </div>
-            {% endif %}
-        {% else %}
-        <!-- Placeholder when no result -->
-        <div class="ats-placeholder">
-            <div class="placeholder-icon">🎯</div>
-            <h3>Ready to Analyze</h3>
-            <p>Paste your resume text and a job description, then click <strong>Analyze ATS Match</strong> to see your score, matched skills, missing skills, and personalized improvement tips.</p>
-            <div class="placeholder-steps">
-                <div class="p-step"><span class="p-step-num">1</span> Paste resume or select saved</div>
-                <div class="p-step"><span class="p-step-num">2</span> Paste job description</div>
-                <div class="p-step"><span class="p-step-num">3</span> See your ATS match score</div>
-            </div>
-        </div>
-        {% endif %}
-    </div>
-</div>
-{% endblock %}
-
-{% block scripts %}
-<script>
-function switchMode(mode) {
-    document.getElementById('pasteMode').style.display = mode === 'paste' ? 'block' : 'none';
-    document.getElementById('savedMode').style.display = mode === 'saved' ? 'block' : 'none';
-    document.getElementById('resume_id').disabled = mode === 'paste';
-    document.getElementById('resume_text').disabled = mode === 'saved';
-    document.getElementById('btnPaste').classList.toggle('active', mode === 'paste');
-    document.getElementById('btnSaved').classList.toggle('active', mode === 'saved');
+        row.style.display = matchSearch && matchStatus ? '' : 'none';
+    });
 }
 
-// Animate score ring on load
-window.addEventListener('load', () => {
-    const circle = document.getElementById('scoreCircle');
-    if (circle) {
-        circle.style.transition = 'stroke-dasharray 1.5s ease-in-out';
+function openEditModal(id, company, role, date, status, location, salary, jobUrl, notes) {
+    document.getElementById('edit_company').value = company || '';
+    document.getElementById('edit_role').value = role || '';
+    document.getElementById('edit_date').value = date || '';
+    document.getElementById('edit_status').value = status || 'Applied';
+    document.getElementById('edit_location').value = location || '';
+    document.getElementById('edit_salary').value = salary || '';
+    document.getElementById('edit_job_url').value = jobUrl || '';
+    document.getElementById('edit_notes').value = notes ? notes.replace(/`/g, '') : '';
+
+    const form = document.getElementById('editForm');
+    form.action = `/tracker/${id}/update`;
+
+    document.getElementById('editModal').classList.add('open');
+}
+
+function closeEditModal() {
+    document.getElementById('editModal').classList.remove('open');
+}
+
+// Close modal on overlay click
+document.getElementById('editModal').addEventListener('click', (e) => {
+    if (e.target === e.currentTarget) closeEditModal();
+});
+
+// Set today as default date for new applications
+document.addEventListener('DOMContentLoaded', () => {
+    const dateInput = document.getElementById('date_applied');
+    if (dateInput && !dateInput.value) {
+        dateInput.value = new Date().toISOString().split('T')[0];
     }
 });
-</script>
-{% endblock %}
 """,
 }
 

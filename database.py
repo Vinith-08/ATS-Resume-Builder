@@ -51,7 +51,7 @@ def init_db():
     conn = get_db()
     conn.close()
 
-# ─── Resume CRUD ─────────────────────────────────────────────────────────────
+# --- Resume CRUD -------------------------------------------------------------
 
 def save_resume(data):
     conn = get_db()
@@ -115,7 +115,7 @@ def delete_resume(resume_id):
     conn.commit()
     conn.close()
 
-# ─── Job Application CRUD ─────────────────────────────────────────────────────
+# --- Job Application CRUD -----------------------------------------------------
 
 def add_application(data):
     conn = get_db()

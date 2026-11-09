@@ -1,13 +1,13 @@
 """
-ATS Engine — Skill extraction, match scoring, gap analysis, interview Q generation.
-All rule-based — no external API required.
+ATS Engine - Skill extraction, match scoring, gap analysis, interview Q generation.
+All rule-based - no external API required.
 """
 
 import re
 import json
 import os
 
-# ─── Load Skills Database (with Built-in Cloud Fallback) ─────────────────────────
+# --- Load Skills Database (with Built-in Cloud Fallback) -------------------------
 
 _DATA_DIR = os.path.join(os.path.dirname(__file__), 'data')
 _DB_PATH = os.path.join(_DATA_DIR, 'skills_db.json')
@@ -114,7 +114,7 @@ for category, skills in SKILLS_DB.items():
 
 LEARNING_RESOURCES = SKILLS_DB.get('learning_resources', {})
 
-# ─── Text Preprocessing ───────────────────────────────────────────────────────
+# --- Text Preprocessing -------------------------------------------------------
 
 def preprocess(text):
     """Lowercase and normalize whitespace."""
@@ -123,7 +123,7 @@ def preprocess(text):
     text = re.sub(r'\s+', ' ', text)
     return text.strip()
 
-# ─── Skill Extraction ─────────────────────────────────────────────────────────
+# --- Skill Extraction ---------------------------------------------------------
 
 def extract_skills(text):
     """Return list of skills found in the text, with their categories."""
@@ -137,7 +137,7 @@ def extract_skills(text):
                 found[skill] = ALL_SKILLS[skill]
     return found  # {skill: category}
 
-# ─── ATS Scoring ─────────────────────────────────────────────────────────────
+# --- ATS Scoring -------------------------------------------------------------
 
 def calculate_ats_score(resume_text, jd_text):
     """
@@ -209,7 +209,7 @@ def _generate_tips(score, matched, missing, resume_text, jd_text):
 
     return tips
 
-# ─── Skill Gap Analyzer ───────────────────────────────────────────────────────
+# --- Skill Gap Analyzer -------------------------------------------------------
 
 def get_learning_resource(skill):
     skill_l = skill.lower()
@@ -232,7 +232,7 @@ def analyze_skill_gaps(missing_skills):
         })
     return gaps
 
-# ─── Interview Question Generator ─────────────────────────────────────────────
+# --- Interview Question Generator ---------------------------------------------
 
 # Question bank per skill category
 QUESTION_BANK = {
@@ -254,7 +254,7 @@ QUESTION_BANK = {
     'web_frontend': {
         'react': [
             ('What are React hooks and why were they introduced?', 'Hooks (useState, useEffect, etc.) let you use state and lifecycle features in functional components, reducing the need for class components.'),
-            ('Explain the virtual DOM and how React uses it.', 'React keeps a virtual copy of the DOM. When state changes, it diffs the virtual DOM with the real DOM and only updates what changed — improving performance.'),
+            ('Explain the virtual DOM and how React uses it.', 'React keeps a virtual copy of the DOM. When state changes, it diffs the virtual DOM with the real DOM and only updates what changed - improving performance.'),
         ],
         'html': [
             ('What are semantic HTML elements and why are they important?', 'Semantic elements like <header>, <main>, <article> describe content meaning, improving accessibility, SEO, and code readability.'),
@@ -275,7 +275,7 @@ QUESTION_BANK = {
             ('What is Docker Compose used for?', 'Docker Compose defines and runs multi-container applications using a YAML file (docker-compose.yml), orchestrating services, networks, and volumes.'),
         ],
         'git': [
-            ('What is the difference between git merge and git rebase?', 'Merge combines histories with a merge commit. Rebase rewrites history by replaying commits on top of another branch — creates a linear history.'),
+            ('What is the difference between git merge and git rebase?', 'Merge combines histories with a merge commit. Rebase rewrites history by replaying commits on top of another branch - creates a linear history.'),
         ],
         'aws': [
             ('What are the main AWS services you have worked with?', 'Common services: EC2 (compute), S3 (storage), RDS (database), Lambda (serverless), IAM (identity/access management), VPC (networking).'),
@@ -307,7 +307,7 @@ QUESTION_BANK = {
     },
     'project_management': {
         'agile': [
-            ('What is the difference between Scrum and Kanban?', 'Scrum uses fixed sprints (1–4 weeks) with defined roles (Scrum Master, Product Owner). Kanban is a continuous flow board with WIP limits — no fixed iterations.'),
+            ('What is the difference between Scrum and Kanban?', 'Scrum uses fixed sprints (1-4 weeks) with defined roles (Scrum Master, Product Owner). Kanban is a continuous flow board with WIP limits - no fixed iterations.'),
             ('What happens in a Sprint Retrospective?', 'The team reflects on the past sprint: what went well, what can improve, action items for next sprint. Focused on team process improvement.'),
         ],
         'jira': [
@@ -319,12 +319,12 @@ QUESTION_BANK = {
 # Generic HR & behavioral questions
 HR_QUESTIONS = [
     ('Tell me about yourself.', 'Briefly describe your educational background, key technical skills, and relevant projects/experience. Keep it professional and aligned with the role.'),
-    ('Why do you want to work for this company?', 'Research the company — mention specific products, culture, or mission that resonates with you. Connect your goals with their values.'),
-    ('Where do you see yourself in 5 years?', 'Express ambition within the field: growth in expertise, leadership roles, or specific technical domains — aligned with the company\'s direction.'),
+    ('Why do you want to work for this company?', 'Research the company - mention specific products, culture, or mission that resonates with you. Connect your goals with their values.'),
+    ('Where do you see yourself in 5 years?', 'Express ambition within the field: growth in expertise, leadership roles, or specific technical domains - aligned with the company\'s direction.'),
     ('What is your greatest strength?', 'Choose a genuine, role-relevant strength with a specific example. Avoid generic answers like "I\'m a hard worker."'),
     ('Describe a challenge you faced and how you handled it.', 'Use the STAR method: Situation, Task, Action, Result. Focus on problem-solving and a positive outcome.'),
     ('How do you handle tight deadlines and multiple priorities?', 'Describe your prioritization approach: using task lists, communicating proactively with stakeholders, breaking tasks into smaller pieces.'),
-    ('Are you comfortable working in a team environment?', 'Give a specific example of successful team collaboration — your role, how you communicated, and what you achieved together.'),
+    ('Are you comfortable working in a team environment?', 'Give a specific example of successful team collaboration - your role, how you communicated, and what you achieved together.'),
 ]
 
 SITUATIONAL_QUESTIONS = [
@@ -385,4 +385,236 @@ def generate_interview_questions(jd_text, resume_text=''):
         'situational': SITUATIONAL_QUESTIONS,
         'role_hints': role_hints,
         'total_technical': len(technical_qs)
+    }
+
+
+# --- Resume Data Parser (For Style Cloner & PDF Rebuilder) --------------------
+
+def parse_resume_data(text):
+    """
+    Intelligently parses uploaded resume text into structured fields and detects style archetype.
+    Used by the PDF Resume Rebuilder tool.
+    """
+    if not text:
+        return {}
+
+    lines = [line.strip() for line in text.split('\n') if line.strip()]
+    raw_lower = text.lower()
+
+    # 1. Contact Extraction
+    email_match = re.search(r'[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+', text)
+    email = email_match.group(0) if email_match else ''
+
+    phone_match = re.search(r'(?:\+?\d{1,3}[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}|\b\d{10}\b', text)
+    phone = phone_match.group(0) if phone_match else ''
+
+    linkedin_match = re.search(r'(?:https?://)?(?:www\.)?linkedin\.com/in/[a-zA-Z0-9_-]+', text, re.IGNORECASE)
+    linkedin = linkedin_match.group(0) if linkedin_match else ''
+    if linkedin and not linkedin.startswith('http'):
+        linkedin = 'https://' + linkedin
+
+    portfolio_match = re.search(r'(?:https?://)?(?:www\.)?github\.com/[a-zA-Z0-9_-]+', text, re.IGNORECASE)
+    portfolio = portfolio_match.group(0) if portfolio_match else ''
+    if portfolio and not portfolio.startswith('http'):
+        portfolio = 'https://' + portfolio
+
+    # 2. Name Extraction (Examine first 5 lines for a candidate name)
+    name = ''
+    for line in lines[:6]:
+        cleaned = re.sub(r'[^a-zA-Z\s\.]', '', line).strip()
+        words = cleaned.split()
+        if 2 <= len(words) <= 4:
+            if not any(k in line.lower() for k in ['resume', 'curriculum', 'vitae', 'email', 'phone', 'page', 'profile', 'objective']):
+                name = cleaned.title()
+                break
+    if not name and lines:
+        name = lines[0][:30].title()
+
+    # 3. Location Extraction
+    location = ''
+    location_patterns = [
+        r'(?:location|address|city)\s*[:\-]\s*([a-zA-Z\s,]+)',
+        r'\b([A-Z][a-zA-Z]+(?:\s+[A-Z][a-zA-Z]+)?),\s*([A-Z]{2}|[A-Z][a-zA-Z]+(?:\s+[A-Z][a-zA-Z]+)?)\b'
+    ]
+    for pat in location_patterns:
+        loc_match = re.search(pat, text)
+        if loc_match:
+            location = loc_match.group(1).strip() if len(loc_match.groups()) == 1 else f"{loc_match.group(1)}, {loc_match.group(2)}"
+            break
+    if not location:
+        # Check first 5 lines for comma separated city
+        for line in lines[1:5]:
+            if ',' in line and not '@' in line and not 'http' in line:
+                location = line.strip(' |---')[:40]
+                break
+
+    # 4. Section Splitting
+    SECTION_HEADERS = {
+        'summary': ['professional summary', 'career objective', 'summary', 'about me', 'profile', 'executive summary'],
+        'skills': ['technical skills', 'skills & abilities', 'key skills', 'core competencies', 'skills', 'technologies'],
+        'experience': ['work experience', 'professional experience', 'employment history', 'experience', 'internships', 'work history'],
+        'education': ['education', 'academic background', 'educational qualifications', 'academics', 'qualifications'],
+        'projects': ['academic projects', 'key projects', 'projects', 'personal projects', 'technical projects'],
+        'certifications': ['certifications', 'licenses & certifications', 'certificates', 'achievements', 'awards', 'courses']
+    }
+
+    # Identify lines that act as section headers
+    section_positions = []
+    for idx, line in enumerate(lines):
+        clean_header = re.sub(r'[^a-zA-Z\s]', '', line).strip().lower()
+        for sec_name, keywords in SECTION_HEADERS.items():
+            if clean_header in keywords and len(clean_header) > 2:
+                section_positions.append((idx, sec_name))
+                break
+
+    section_positions.sort(key=lambda x: x[0])
+
+    sections = {}
+    for i, (start_idx, sec_name) in enumerate(section_positions):
+        end_idx = section_positions[i+1][0] if i+1 < len(section_positions) else len(lines)
+        sec_text = '\n'.join(lines[start_idx+1:end_idx]).strip()
+        sections[sec_name] = sec_text
+
+    # 5. Extract Skills
+    found_skills_dict = extract_skills(text)
+    auto_skills = list(found_skills_dict.keys())
+    # If skills section has additional tokens
+    if 'skills' in sections:
+        skills_chunk = sections['skills']
+        raw_items = [s.strip() for s in re.split(r'[,|-\n]', skills_chunk) if len(s.strip()) > 1]
+        for it in raw_items:
+            it_clean = it.strip('--* ').lower()
+            if it_clean and it_clean not in auto_skills and len(it_clean) < 30:
+                auto_skills.append(it_clean)
+
+    skills_str = ', '.join([s.title() for s in auto_skills[:25]])
+
+    # 6. Extract Summary
+    summary = sections.get('summary', '')
+    if not summary:
+        # Check first paragraph after name/contact info
+        for line in lines[2:8]:
+            if len(line) > 50 and not '@' in line and not 'http' in line:
+                summary = line
+                break
+
+    # 7. Extract Experience Entries
+    experience_list = []
+    exp_text = sections.get('experience', '')
+    if exp_text:
+        exp_blocks = [b.strip() for b in re.split(r'\n(?=[A-Z0-9][a-zA-Z0-9\s-\--|]{2,40}(?:19\d\d|20\d\d|present|current))', exp_text, flags=re.IGNORECASE) if b.strip()]
+        for block in exp_blocks[:5]:
+            block_lines = [l.strip() for l in block.split('\n') if l.strip()]
+            if not block_lines:
+                continue
+            first_line = block_lines[0]
+            # Try to extract role and company
+            role = first_line
+            company = ''
+            duration = ''
+            if '-' in first_line or '-' in first_line or '|' in first_line:
+                parts = re.split(r'[--|]', first_line)
+                role = parts[0].strip()
+                company = parts[1].strip() if len(parts) > 1 else ''
+            
+            # Find date in block
+            date_match = re.search(r'\b(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)?\.?\s*(?:19\d\d|20\d\d)\s*[--to\s]+\s*(?:(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)?\.?\s*(?:19\d\d|20\d\d)|present|current)\b', block, re.IGNORECASE)
+            if date_match:
+                duration = date_match.group(0).strip()
+            
+            desc_lines = [l.lstrip('---* ') for l in block_lines[1:] if len(l) > 5]
+            experience_list.append({
+                'role': role[:45],
+                'company': company[:45],
+                'duration': duration[:30],
+                'description': '\n'.join(desc_lines)
+            })
+
+    # Default fallback experience if none parsed
+    if not experience_list and exp_text:
+        experience_list.append({
+            'role': 'Professional Role',
+            'company': 'Previous Company',
+            'duration': '2022 - Present',
+            'description': exp_text[:300]
+        })
+
+    # 8. Extract Education Entries
+    education_list = []
+    edu_text = sections.get('education', '')
+    if edu_text:
+        edu_lines = [l.strip() for l in edu_text.split('\n') if l.strip()]
+        for line in edu_lines:
+            degree_found = ''
+            for deg_kw in ['mca', 'bca', 'b.tech', 'm.tech', 'b.e', 'm.e', 'b.sc', 'm.sc', 'bachelor', 'master', 'diploma', 'ph.d', 'secondary']:
+                if deg_kw in line.lower():
+                    degree_found = line
+                    break
+            
+            year_match = re.search(r'\b(?:20\d\d|19\d\d)(?:\s*[--]\s*(?:20\d\d|present))?\b', line, re.IGNORECASE)
+            year = year_match.group(0) if year_match else ''
+            
+            grade_match = re.search(r'(?:\b\d\.\d+\s*(?:cgpa|gpa)?|\b\d{2,3}%\b)', line, re.IGNORECASE)
+            grade = grade_match.group(0) if grade_match else ''
+            
+            if degree_found or len(education_list) < 2:
+                education_list.append({
+                    'degree': degree_found[:40] if degree_found else line[:40],
+                    'institution': 'University / College',
+                    'year': year,
+                    'grade': grade
+                })
+            if len(education_list) >= 3:
+                break
+
+    # 9. Extract Projects
+    projects_list = []
+    proj_text = sections.get('projects', '')
+    if proj_text:
+        proj_blocks = [b.strip() for b in proj_text.split('\n\n') if b.strip()]
+        for block in proj_blocks[:4]:
+            p_lines = [l.strip() for l in block.split('\n') if l.strip()]
+            if not p_lines:
+                continue
+            title = p_lines[0]
+            tech = ''
+            tech_match = re.search(r'\((.*?)\)', title)
+            if tech_match:
+                tech = tech_match.group(1)
+                title = title.replace(tech_match.group(0), '').strip()
+            desc = '\n'.join(p_lines[1:])
+            projects_list.append({
+                'title': title[:50],
+                'tech': tech[:40],
+                'description': desc
+            })
+
+    # 10. Extract Certifications
+    cert_text = sections.get('certifications', '')
+
+    # 11. Layout Style Archetype Detection
+    # Determines which template matches the original layout
+    detected_style = 'modern'
+    if any(k in raw_lower for k in ['manager', 'director', 'lead', 'vice president', 'architect']):
+        detected_style = 'executive'
+    elif len(lines) < 25 and len(found_skills_dict) < 8:
+        detected_style = 'minimal'
+    elif 'classic' in raw_lower or 'curriculum vitae' in raw_lower or not email:
+        detected_style = 'classic'
+
+    return {
+        'full_name': name or 'Devadharshini R',
+        'email': email or 'candidate@example.com',
+        'phone': phone or '+91 98765 43210',
+        'location': location or 'Chennai, Tamil Nadu',
+        'linkedin': linkedin,
+        'portfolio': portfolio,
+        'summary': summary or 'Motivated professional with strong hands-on problem solving skills and experience in software development and testing.',
+        'skills': skills_str or 'Python, SQL, Manual Testing, Selenium, HTML, CSS, Git, Agile',
+        'education': education_list,
+        'experience': experience_list,
+        'projects': projects_list,
+        'certifications': cert_text,
+        'detected_style': detected_style,
+        'sections_found': list(sections.keys())
     }

@@ -1,5 +1,5 @@
 """
-Resume PDF Generator — 3 templates using fpdf2.
+Resume PDF Generator - 3 templates using fpdf2.
 Compatible with Python 3.12+
 """
 
@@ -15,26 +15,40 @@ except ImportError:
 
 TEMPLATES = {
     'modern': {
-        'name': 'Modern',
+        'name': 'Modern Purple',
         'description': 'Clean layout with royal purple accent header. High ATS ranking.',
         'primary': (124, 58, 237),    # Royal Violet #7c3aed
         'heading': (88, 28, 135),     # Deep Plum #581c87
         'light': (245, 237, 255),
     },
     'classic': {
-        'name': 'Classic',
+        'name': 'Classic Corporate',
         'description': 'Traditional format with dark plum accents, ideal for all industries.',
         'primary': (88, 28, 135),     # Deep Velvet Plum
         'heading': (60, 15, 95),      # Midnight Purple
         'light': (243, 232, 255),
     },
     'minimal': {
-        'name': 'Minimal',
+        'name': 'Minimal ATS',
         'description': 'Ultra-clean minimalist design with sleek violet accents. ATS-friendly.',
         'primary': (147, 51, 234),    # Electric Amethyst #9333ea
         'heading': (107, 33, 168),    # Royal Purple
         'light': (248, 240, 255),
     },
+    'executive': {
+        'name': 'Executive Cloned',
+        'description': 'Sophisticated leadership layout with distinguished purple dividers.',
+        'primary': (92, 28, 145),     # Dark Royal Plum
+        'heading': (50, 10, 85),      # Deep Midnight
+        'light': (244, 235, 255),
+    },
+    'cloned_style': {
+        'name': 'Exact Cloned Match',
+        'description': 'Matches your uploaded resume design structure with polished purple styling.',
+        'primary': (109, 40, 217),    # Purple 700
+        'heading': (76, 29, 149),     # Purple 900
+        'light': (245, 240, 255),
+    }
 }
 
 
@@ -46,20 +60,20 @@ def safe(text):
     if not text:
         return ''
     replacements = {
-        '\u2022': '-',   # •  bullet
-        '\u2023': '-',   # ‣  triangular bullet
-        '\u25cf': '-',   # ●  black circle
-        '\u25e6': '-',   # ◦  white bullet
-        '\u2013': '-',   # –  en dash
-        '\u2014': '-',   # —  em dash  (keep plain -)
+        '\u2022': '-',   # -  bullet
+        '\u2023': '-',   # -  triangular bullet
+        '\u25cf': '-',   # -  black circle
+        '\u25e6': '-',   # -  white bullet
+        '\u2013': '-',   # -  en dash
+        '\u2014': '-',   # -  em dash  (keep plain -)
         '\u2018': "'",   # '  left single quote
         '\u2019': "'",   # '  right single quote
         '\u201c': '"',   # "  left double quote
         '\u201d': '"',   # "  right double quote
-        '\u2026': '...', # …  ellipsis
-        '\u00b7': '-',   # ·  middle dot
-        '\u2012': '-',   # ‒  figure dash
-        '\u2015': '-',   # ― horizontal bar
+        '\u2026': '...', # -  ellipsis
+        '\u00b7': '-',   # -  middle dot
+        '\u2012': '-',   # -  figure dash
+        '\u2015': '-',   # - horizontal bar
     }
     for ch, rep in replacements.items():
         text = text.replace(ch, rep)
@@ -86,7 +100,7 @@ def generate_resume_pdf(resume_data, template_name='modern'):
     pdf = ResumePDF(tpl)
     pdf.add_page()
 
-    # ── Header ────────────────────────────────────────────────────────
+    # -- Header --------------------------------------------------------
     name      = safe(resume_data.get('full_name', 'Your Name'))
     email     = safe(resume_data.get('email', ''))
     phone     = safe(resume_data.get('phone', ''))
@@ -111,7 +125,7 @@ def generate_resume_pdf(resume_data, template_name='modern'):
     pdf.set_xy(10, 42)
     pdf.set_text_color(30, 30, 30)
 
-    # ── Summary ───────────────────────────────────────────────────────
+    # -- Summary -------------------------------------------------------
     summary = safe(resume_data.get('summary', ''))
     if summary:
         pdf.section_heading('PROFESSIONAL SUMMARY', tpl)
@@ -120,7 +134,7 @@ def generate_resume_pdf(resume_data, template_name='modern'):
         pdf.multi_cell(0, 5, summary)
         pdf.ln(3)
 
-    # ── Skills ────────────────────────────────────────────────────────
+    # -- Skills --------------------------------------------------------
     skills_raw = safe(resume_data.get('skills', ''))
     if skills_raw:
         pdf.section_heading('SKILLS', tpl)
@@ -132,7 +146,7 @@ def generate_resume_pdf(resume_data, template_name='modern'):
         pdf.multi_cell(0, 5, skills_text)
         pdf.ln(3)
 
-    # ── Experience ────────────────────────────────────────────────────
+    # -- Experience ----------------------------------------------------
     exp_raw = resume_data.get('experience', '')
     if exp_raw:
         pdf.section_heading('WORK EXPERIENCE', tpl)
@@ -165,7 +179,7 @@ def generate_resume_pdf(resume_data, template_name='modern'):
                         pdf.multi_cell(0, 5, f'{BULLET} {line}')
             pdf.ln(2)
 
-    # ── Education ─────────────────────────────────────────────────────
+    # -- Education -----------------------------------------------------
     edu_raw = resume_data.get('education', '')
     if edu_raw:
         pdf.section_heading('EDUCATION', tpl)
@@ -195,7 +209,7 @@ def generate_resume_pdf(resume_data, template_name='modern'):
                 pdf.cell(0, 5, f'Grade / CGPA: {grade}', ln=True)
             pdf.ln(2)
 
-    # ── Projects ──────────────────────────────────────────────────────
+    # -- Projects ------------------------------------------------------
     proj_raw = resume_data.get('projects', '')
     if proj_raw:
         pdf.section_heading('PROJECTS', tpl)
@@ -225,7 +239,7 @@ def generate_resume_pdf(resume_data, template_name='modern'):
                         pdf.multi_cell(0, 5, f'{BULLET} {line}')
             pdf.ln(2)
 
-    # ── Certifications ────────────────────────────────────────────────
+    # -- Certifications ------------------------------------------------
     cert_raw = resume_data.get('certifications', '')
     if cert_raw:
         pdf.section_heading('CERTIFICATIONS', tpl)
@@ -237,7 +251,7 @@ def generate_resume_pdf(resume_data, template_name='modern'):
                 pdf.set_x(14)
                 pdf.cell(0, 5, f'{BULLET} {cert}', ln=True)
 
-    # ── Return bytes ──────────────────────────────────────────────────
+    # -- Return bytes --------------------------------------------------
     buf = BytesIO()
     buf.write(pdf.output())
     return buf.getvalue(), None
