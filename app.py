@@ -13,13 +13,45 @@ import database as db
 import ats_engine as ats
 import resume_generator as rg
 
+from jinja2 import ChoiceLoader, FileSystemLoader, DictLoader
+
+# ─── Self-Extracting Frontend Assets (Zero-Folder-Upload Required) ────────────
+try:
+    import templates_bundle
+    templates_bundle.extract_all()
+    _in_memory_templates = {
+        k.replace('templates/', ''): v for k, v in templates_bundle.ASSETS.items() if k.startswith('templates/')
+    }
+except Exception as _e:
+    print(f"Templates bundle notice: {_e}")
+    _in_memory_templates = {}
+
 # ─── App Setup ────────────────────────────────────────────────────────────────
 
-app = Flask(__name__)
+BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+
+template_paths = [
+    os.path.join(BASE_DIR, 'templates'),
+    os.path.join(BASE_DIR, 'Templates'),
+    BASE_DIR,
+]
+
+static_dir = os.path.join(BASE_DIR, 'static')
+if not os.path.exists(static_dir) and os.path.exists(os.path.join(BASE_DIR, 'Static')):
+    static_dir = os.path.join(BASE_DIR, 'Static')
+
+app = Flask(__name__, static_folder=static_dir)
 app.secret_key = 'ats_resume_builder_secret_2024'
 
+# Multi-path Jinja loader: searches memory, 'templates/', 'Templates/', and root
+loaders = [DictLoader(_in_memory_templates)]
+for p in template_paths:
+    if os.path.exists(p):
+        loaders.append(FileSystemLoader(p))
+app.jinja_loader = ChoiceLoader(loaders)
+
 # Ensure upload folder exists
-UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), 'static', 'uploads')
+UPLOAD_FOLDER = os.path.join(static_dir, 'uploads')
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 # Init database on startup
