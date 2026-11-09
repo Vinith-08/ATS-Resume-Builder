@@ -618,3 +618,98 @@ def parse_resume_data(text):
         'detected_style': detected_style,
         'sections_found': list(sections.keys())
     }
+
+
+# --- Job Description Optimization --------------------------------------------
+
+def optimize_resume_for_jd(parsed_data, jd_text):
+    """
+    Optimize a parsed resume dict against a Job Description.
+    Returns the mutated parsed_data plus an optimization_report dict.
+    Pure rule-based - no external API required.
+    """
+    if not jd_text or not jd_text.strip():
+        return parsed_data, {}
+
+    resume_skills_str = parsed_data.get('skills', '')
+    resume_summary = parsed_data.get('summary', '')
+
+    # --- Score before optimization ---
+    score_before_data = calculate_ats_score(
+        resume_skills_str + ' ' + resume_summary,
+        jd_text
+    )
+    score_before = score_before_data.get('score', 0)
+    matched_skills = score_before_data.get('matched_skills', [])
+    missing_skills = score_before_data.get('missing_skills', [])
+
+    # --- Extract top JD keywords (bigrams + single words) ---
+    jd_lower = jd_text.lower()
+    jd_words = re.findall(r'\b[a-z][a-z0-9+#.]{2,}\b', jd_lower)
+    # Build bigrams
+    jd_bigrams = [jd_words[i] + ' ' + jd_words[i+1] for i in range(len(jd_words)-1)]
+    all_jd_terms = jd_bigrams + jd_words
+
+    # Match against skills DB
+    all_known = []
+    for cat, items in _DEFAULT_SKILLS.items():
+        if isinstance(items, list):
+            all_known.extend(items)
+
+    jd_keywords = []
+    for term in all_jd_terms:
+        if term in all_known and term not in jd_keywords:
+            jd_keywords.append(term)
+
+    # --- Reorder skills: matched first, then rest ---
+    existing_skill_list = [s.strip() for s in resume_skills_str.split(',') if s.strip()]
+    matched_set = {m.lower() for m in matched_skills}
+
+    leading = [s for s in existing_skill_list if s.lower() in matched_set]
+    trailing = [s for s in existing_skill_list if s.lower() not in matched_set]
+
+    # Suggested skills: top missing that exist in JD keywords
+    suggested = []
+    for m in missing_skills[:8]:
+        if m.lower() in jd_lower and m not in suggested:
+            suggested.append(m)
+
+    optimized_skills_list = leading + trailing
+    optimized_skills_str = ', '.join(optimized_skills_list) if optimized_skills_list else resume_skills_str
+
+    # --- Optimize summary: inject top 3 missing JD keywords naturally ---
+    optimized_summary = resume_summary
+    summary_changed = False
+    if missing_skills and resume_summary:
+        inject_terms = [s for s in missing_skills[:5] if len(s) > 3 and s.lower() not in resume_summary.lower()][:3]
+        if inject_terms:
+            terms_str = ', '.join(inject_terms)
+            if resume_summary.endswith('.'):
+                optimized_summary = resume_summary[:-1] + ', with exposure to ' + terms_str + '.'
+            else:
+                optimized_summary = resume_summary + '. Familiar with ' + terms_str + '.'
+            summary_changed = True
+
+    # --- Score after optimization ---
+    score_after_data = calculate_ats_score(
+        optimized_skills_str + ' ' + optimized_summary,
+        jd_text
+    )
+    score_after = score_after_data.get('score', 0)
+
+    # Apply changes back to parsed_data
+    parsed_data['skills'] = optimized_skills_str
+    if summary_changed:
+        parsed_data['summary'] = optimized_summary
+
+    optimization_report = {
+        'score_before': score_before,
+        'score_after': score_after,
+        'matched_skills': matched_skills,
+        'missing_skills': missing_skills[:10],
+        'suggested_skills': suggested,
+        'summary_changed': summary_changed,
+        'optimized_summary': optimized_summary if summary_changed else '',
+    }
+
+    return parsed_data, optimization_report

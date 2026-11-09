@@ -517,6 +517,29 @@ ASSETS = {
                 Auto-Parse &amp; Match Style
             </button>
         </div>
+
+        <!-- JD Optimization Textarea -->
+        <div class="form-card" style="margin-top: 20px; border: 1.5px solid rgba(147,51,234,0.5); background: rgba(30,10,70,0.6);">
+            <div class="form-card-header">
+                <div class="form-card-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="form-card-title">Job Description Optimization <span style="background: linear-gradient(90deg,#7c3aed,#a855f7); color:#fff; font-size:11px; padding:2px 10px; border-radius:20px; font-weight:600; vertical-align: middle;">AI Feature</span></h3>
+                    <p class="form-card-sub">Paste the job description - AI tailors your resume keywords and summary to match the role</p>
+                </div>
+            </div>
+            <div class="form-group" style="margin-top: 0;">
+                <textarea name="job_description" class="form-textarea" rows="5"
+                    placeholder="Paste the full job description here (optional). AI will: 1) Reorder skills to put JD-matching ones first. 2) Enhance summary with JD keywords. 3) Show ATS match score report."
+                    style="font-size: 13.5px; line-height: 1.6;"></textarea>
+                <p style="margin-top: 6px; font-size: 12px; color: var(--purple-pale); opacity: 0.75;">
+                    Tip: The more of the actual JD you paste, the more accurately the AI can optimize your resume.
+                </p>
+            </div>
+        </div>
     </form>
 </div>
 
@@ -603,6 +626,88 @@ ASSETS = {
         </div>
         <input type="hidden" name="template_name" id="selectedTemplateInput" value="{{ parsed.detected_style if parsed.detected_style in ['modern', 'classic', 'minimal', 'executive'] else 'cloned_style' }}">
     </div>
+
+    <!-- AI Optimization Report (shown if JD was provided) -->
+    {% if opt_report %}
+    <div class="form-card" style="border: 1.5px solid rgba(124,58,237,0.6); background: rgba(20,5,55,0.7); margin-bottom: 20px;">
+        <div class="form-card-header">
+            <div class="form-card-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                </svg>
+            </div>
+            <div>
+                <h3 class="form-card-title">AI Optimization Report</h3>
+                <p class="form-card-sub">Your resume was automatically tailored to the job description</p>
+            </div>
+        </div>
+
+        <!-- ATS Score Before / After -->
+        <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 18px;">
+            <div style="flex: 1; min-width: 180px;">
+                <div style="font-size: 12px; color: var(--purple-pale); margin-bottom: 6px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em;">ATS Score Before</div>
+                <div style="background: rgba(255,255,255,0.07); border-radius: 8px; overflow: hidden; height: 10px; margin-bottom: 4px;">
+                    <div style="width: {{ opt_report.score_before }}%; height: 10px; background: rgba(192,132,252,0.4); border-radius: 8px; transition: width 0.6s;"></div>
+                </div>
+                <div style="font-size: 20px; font-weight: 700; color: #c084fc;">{{ opt_report.score_before }}%</div>
+            </div>
+            <div style="display: flex; align-items: center; padding-top: 10px; color: #a855f7; font-size: 24px; font-weight: 700;">-&gt;</div>
+            <div style="flex: 1; min-width: 180px;">
+                <div style="font-size: 12px; color: var(--purple-pale); margin-bottom: 6px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em;">ATS Score After</div>
+                <div style="background: rgba(255,255,255,0.07); border-radius: 8px; overflow: hidden; height: 10px; margin-bottom: 4px;">
+                    <div style="width: {{ opt_report.score_after }}%; height: 10px; background: linear-gradient(90deg,#7c3aed,#a855f7); border-radius: 8px; transition: width 0.6s;"></div>
+                </div>
+                <div style="font-size: 20px; font-weight: 700; color: #a855f7;">{{ opt_report.score_after }}%</div>
+            </div>
+        </div>
+
+        {% if opt_report.matched_skills %}
+        <div style="margin-bottom: 14px;">
+            <div style="font-size: 12px; font-weight: 600; color: #86efac; margin-bottom: 8px; text-transform: uppercase; letter-spacing: .05em;">Matched Skills (Already In Resume)</div>
+            <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                {% for sk in opt_report.matched_skills %}
+                <span style="background: rgba(34,197,94,0.15); border: 1px solid rgba(34,197,94,0.35); color: #86efac; border-radius: 20px; padding: 3px 11px; font-size: 12px; font-weight: 500;">{{ sk }}</span>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% if opt_report.suggested_skills %}
+        <div style="margin-bottom: 14px;">
+            <div style="font-size: 12px; font-weight: 600; color: #c084fc; margin-bottom: 8px; text-transform: uppercase; letter-spacing: .05em;">Suggested Skills to Add</div>
+            <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                {% for sk in opt_report.suggested_skills %}
+                <span style="background: rgba(168,85,247,0.15); border: 1px solid rgba(168,85,247,0.4); color: #c084fc; border-radius: 20px; padding: 3px 11px; font-size: 12px; font-weight: 500;">+ {{ sk }}</span>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% if opt_report.missing_skills %}
+        <div style="margin-bottom: 14px;">
+            <div style="font-size: 12px; font-weight: 600; color: #fca5a5; margin-bottom: 8px; text-transform: uppercase; letter-spacing: .05em;">Skills Gap (Missing from Resume)</div>
+            <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                {% for sk in opt_report.missing_skills %}
+                <span style="background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: #fca5a5; border-radius: 20px; padding: 3px 11px; font-size: 12px; font-weight: 500;">{{ sk }}</span>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% if opt_report.summary_changed %}
+        <div style="background: rgba(124,58,237,0.15); border: 1px solid rgba(124,58,237,0.4); border-radius: 10px; padding: 12px 16px; margin-top: 6px;">
+            <div style="font-size: 12px; font-weight: 600; color: #c084fc; margin-bottom: 4px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2.5" style="vertical-align: middle; margin-right: 4px;"><polyline points="20 6 9 17 4 12"/></svg>
+                AI Summary Optimization Applied
+            </div>
+            <div style="font-size: 12.5px; color: var(--purple-pale); line-height: 1.6;">Your Professional Summary was enhanced with JD-relevant keywords. Review and edit it in the form below before downloading.</div>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <!-- Hidden: preserve JD for export -->
+    <input type="hidden" name="job_description" value="{{ jd_text|e }}">
 
     <!-- Personal Information -->
     <div class="form-card">

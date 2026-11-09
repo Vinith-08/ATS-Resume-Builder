@@ -384,10 +384,22 @@ def pdf_rebuilder():
             flash('Please select a PDF/DOCX file or paste resume text.', 'warning')
             return redirect(url_for('pdf_rebuilder'))
 
+        jd_text = request.form.get('job_description', '').strip()
         parsed_data = ats.parse_resume_data(uploaded_text)
-        flash(f"Resume parsed! Matched style: {parsed_data.get('detected_style', 'modern').upper()}", 'success')
+        opt_report = {}
+        if jd_text:
+            parsed_data, opt_report = ats.optimize_resume_for_jd(parsed_data, jd_text)
+            flash(
+                f"Resume parsed and JD-optimized! ATS score improved from "
+                f"{opt_report.get('score_before', 0)}% to {opt_report.get('score_after', 0)}%.",
+                'success'
+            )
+        else:
+            flash(f"Resume parsed! Matched style: {parsed_data.get('detected_style', 'modern').upper()}", 'success')
 
     elif request.method == 'GET':
+        jd_text = ''
+        opt_report = {}
         resume_id = request.args.get('resume_id')
         if resume_id:
             try:
@@ -437,7 +449,9 @@ def pdf_rebuilder():
         'pdf_rebuilder.html',
         parsed=parsed_data,
         resume_list=resume_list,
-        uploaded_text=uploaded_text
+        uploaded_text=uploaded_text,
+        jd_text=jd_text,
+        opt_report=opt_report
     )
 
 
@@ -513,6 +527,17 @@ def export_rebuilt_pdf():
             'projects': json.dumps(proj_list),
             'certifications': certifications
         }
+
+        # Apply JD optimization if a job description was passed through
+        jd_text_export = request.form.get('job_description', '').strip()
+        if jd_text_export:
+            resume_dict_flat = dict(resume_dict)
+            resume_dict_flat['experience'] = exp_list
+            resume_dict_flat['education'] = edu_list
+            resume_dict_flat['projects'] = proj_list
+            resume_dict_flat, _ = ats.optimize_resume_for_jd(resume_dict_flat, jd_text_export)
+            resume_dict['summary'] = resume_dict_flat.get('summary', summary)
+            resume_dict['skills'] = resume_dict_flat.get('skills', skills)
 
         # Optional save to DB
         if request.form.get('save_to_db') == '1':
