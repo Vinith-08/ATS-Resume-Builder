@@ -61,9 +61,14 @@ def extract_text_from_file(file):
 @app.route('/')
 def dashboard():
     """Landing dashboard with stats."""
-    resumes = db.get_all_resumes()
-    stats = db.get_stats()
-    return render_template('index.html', resumes=resumes, stats=stats)
+    try:
+        resumes = db.get_all_resumes()
+        stats = db.get_stats()
+        return render_template('index.html', resumes=resumes, stats=stats)
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return render_template('index.html', resumes=[], stats={'total': 0, 'by_status': {}})
 
 
 # ── Resume Builder ────────────────────────────────────────────────────────────

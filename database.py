@@ -3,18 +3,9 @@ import os
 
 DB_PATH = os.path.join(os.path.dirname(__file__), 'data', 'ats_resume.db')
 
-def get_db():
-    os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
-    return conn
-
-def init_db():
-    os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
-    conn = get_db()
+def _init_tables(conn):
+    """Ensure all database tables exist."""
     c = conn.cursor()
-
-    # Resumes table
     c.execute('''
         CREATE TABLE IF NOT EXISTS resumes (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -33,8 +24,6 @@ def init_db():
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     ''')
-
-    # Job Applications table
     c.execute('''
         CREATE TABLE IF NOT EXISTS job_applications (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -49,8 +38,17 @@ def init_db():
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     ''')
-
     conn.commit()
+
+def get_db():
+    os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    _init_tables(conn)
+    return conn
+
+def init_db():
+    conn = get_db()
     conn.close()
 
 # ─── Resume CRUD ─────────────────────────────────────────────────────────────
@@ -82,12 +80,16 @@ def get_resume(resume_id):
     return dict(row) if row else None
 
 def get_all_resumes():
-    conn = get_db()
-    c = conn.cursor()
-    c.execute('SELECT id, full_name, email, created_at FROM resumes ORDER BY created_at DESC')
-    rows = c.fetchall()
-    conn.close()
-    return [dict(r) for r in rows]
+    try:
+        conn = get_db()
+        c = conn.cursor()
+        c.execute('SELECT id, full_name, email, created_at FROM resumes ORDER BY created_at DESC')
+        rows = c.fetchall()
+        conn.close()
+        return [dict(r) for r in rows]
+    except Exception as e:
+        print(f"Database error in get_all_resumes: {e}")
+        return []
 
 def update_resume(resume_id, data):
     conn = get_db()
@@ -169,11 +171,15 @@ def delete_application(app_id):
     conn.close()
 
 def get_stats():
-    conn = get_db()
-    c = conn.cursor()
-    c.execute('SELECT status, COUNT(*) as count FROM job_applications GROUP BY status')
-    rows = c.fetchall()
-    conn.close()
-    stats = {r['status']: r['count'] for r in rows}
-    total = sum(stats.values())
-    return {'total': total, 'by_status': stats}
+    try:
+        conn = get_db()
+        c = conn.cursor()
+        c.execute('SELECT status, COUNT(*) as count FROM job_applications GROUP BY status')
+        rows = c.fetchall()
+        conn.close()
+        stats = {r['status']: r['count'] for r in rows}
+        total = sum(stats.values())
+        return {'total': total, 'by_status': stats}
+    except Exception as e:
+        print(f"Database error in get_stats: {e}")
+        return {'total': 0, 'by_status': {}}
