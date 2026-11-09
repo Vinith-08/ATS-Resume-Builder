@@ -7,11 +7,103 @@ import re
 import json
 import os
 
-# ─── Load Skills Database ─────────────────────────────────────────────────────
+# ─── Load Skills Database (with Built-in Cloud Fallback) ─────────────────────────
 
-_DB_PATH = os.path.join(os.path.dirname(__file__), 'data', 'skills_db.json')
-with open(_DB_PATH, 'r', encoding='utf-8') as f:
-    SKILLS_DB = json.load(f)
+_DATA_DIR = os.path.join(os.path.dirname(__file__), 'data')
+_DB_PATH = os.path.join(_DATA_DIR, 'skills_db.json')
+
+_DEFAULT_SKILLS = {
+    "programming_languages": [
+        "python", "java", "javascript", "typescript", "c", "c++", "c#", "ruby", "go", "rust",
+        "kotlin", "swift", "php", "r", "scala", "perl", "dart", "lua", "haskell", "matlab",
+        "vba", "cobol", "fortran", "assembly", "groovy", "julia", "elixir", "clojure"
+    ],
+    "web_frontend": [
+        "html", "css", "html5", "css3", "react", "angular", "vue", "vue.js", "react.js",
+        "next.js", "nuxt.js", "svelte", "jquery", "bootstrap", "tailwind", "tailwindcss",
+        "sass", "scss", "less", "webpack", "vite", "babel", "redux", "mobx", "graphql",
+        "typescript", "ajax", "rest api", "responsive design", "web design"
+    ],
+    "web_backend": [
+        "flask", "django", "fastapi", "express", "express.js", "node.js", "spring", "spring boot",
+        "laravel", "rails", "ruby on rails", "asp.net", ".net", "hibernate", "microservices",
+        "rest", "restful api", "soap", "api development", "web services"
+    ],
+    "databases": [
+        "sql", "mysql", "postgresql", "sqlite", "mongodb", "redis", "oracle", "microsoft sql server",
+        "cassandra", "dynamodb", "firebase", "elasticsearch", "neo4j", "mariadb", "nosql",
+        "database design", "data modeling", "stored procedures", "database administration"
+    ],
+    "cloud_devops": [
+        "aws", "azure", "gcp", "google cloud", "docker", "kubernetes", "jenkins", "terraform",
+        "ansible", "ci/cd", "devops", "linux", "unix", "bash", "shell scripting", "git",
+        "github", "gitlab", "bitbucket", "nginx", "apache", "helm", "prometheus", "grafana",
+        "cloudformation", "serverless", "lambda", "ec2", "s3", "rds"
+    ],
+    "data_science_ml": [
+        "machine learning", "deep learning", "artificial intelligence", "ai", "ml", "nlp",
+        "natural language processing", "computer vision", "tensorflow", "pytorch", "keras",
+        "scikit-learn", "pandas", "numpy", "matplotlib", "seaborn", "tableau", "power bi",
+        "data analysis", "data visualization", "statistics", "big data", "hadoop", "spark",
+        "data mining", "neural networks", "regression", "classification", "clustering",
+        "feature engineering", "model training", "opencv", "hugging face"
+    ],
+    "testing": [
+        "manual testing", "automation testing", "selenium", "playwright", "cypress",
+        "functional testing", "regression testing", "integration testing", "unit testing",
+        "performance testing", "load testing", "api testing", "postman", "testng",
+        "junit", "pytest", "jest", "mocha", "cucumber", "bdd", "tdd", "jmeter",
+        "qa", "quality assurance", "test planning", "test cases", "bug reporting",
+        "defect tracking", "appium", "mobile testing", "cross browser testing"
+    ],
+    "project_management": [
+        "agile", "scrum", "kanban", "jira", "confluence", "trello", "asana",
+        "project management", "product management", "sprint planning", "sdlc",
+        "waterfall", "lean", "six sigma", "pmp", "risk management"
+    ],
+    "security": [
+        "cybersecurity", "network security", "penetration testing", "ethical hacking",
+        "owasp", "encryption", "ssl", "tls", "vpn", "firewall", "siem", "vulnerability assessment",
+        "information security", "identity management", "sso", "oauth", "jwt"
+    ],
+    "mobile": [
+        "android", "ios", "react native", "flutter", "xamarin", "swift", "kotlin",
+        "mobile development", "android studio", "xcode"
+    ],
+    "soft_skills": [
+        "communication", "leadership", "teamwork", "problem solving", "critical thinking",
+        "time management", "adaptability", "creativity", "collaboration", "analytical",
+        "attention to detail", "multitasking", "presentation", "negotiation"
+    ],
+    "learning_resources": {
+        "python": "https://www.w3schools.com/python/",
+        "java": "https://www.w3schools.com/java/",
+        "javascript": "https://javascript.info/",
+        "react": "https://react.dev/learn",
+        "sql": "https://www.w3schools.com/sql/",
+        "mysql": "https://www.mysqltutorial.org/",
+        "docker": "https://docs.docker.com/get-started/",
+        "aws": "https://aws.amazon.com/training/",
+        "machine learning": "https://www.coursera.org/learn/machine-learning",
+        "selenium": "https://www.selenium.dev/documentation/",
+        "git": "https://git-scm.com/doc",
+        "agile": "https://www.atlassian.com/agile",
+        "default": "https://www.coursera.org/search?query="
+    }
+}
+
+SKILLS_DB = _DEFAULT_SKILLS
+try:
+    if os.path.exists(_DB_PATH):
+        with open(_DB_PATH, 'r', encoding='utf-8') as f:
+            SKILLS_DB = json.load(f)
+    else:
+        # Recreate directory and file automatically if missing in cloud container
+        os.makedirs(_DATA_DIR, exist_ok=True)
+        with open(_DB_PATH, 'w', encoding='utf-8') as f:
+            json.dump(_DEFAULT_SKILLS, f, indent=2)
+except Exception:
+    SKILLS_DB = _DEFAULT_SKILLS
 
 # Flatten all skills into one searchable list (preserve category info)
 ALL_SKILLS = {}  # skill_lower -> category
