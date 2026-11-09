@@ -1,4 +1,5 @@
-﻿"""
+# -*- coding: utf-8 -*-
+"""
 Embedded Frontend Assets Bundle
 Automatically self-extracts templates and static files on boot
 """
@@ -13,8 +14,8 @@ ASSETS = {
     <meta name="theme-color" content="#08001a">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="description" content="AI-Powered ATS Resume Builder â€” Create ATS-optimized resumes, analyze job matches, and prepare for interviews.">
-    <title>{% block title %}ATS Resume Builder{% endblock %} â€” AI-Powered</title>
+    <meta name="description" content="AI-Powered ATS Resume Builder — Create ATS-optimized resumes, analyze job matches, and prepare for interviews.">
+    <title>{% block title %}ATS Resume Builder{% endblock %} — AI-Powered</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -44,7 +45,7 @@ ASSETS = {
                 <span class="brand-name">ATS Builder</span>
                 <span class="brand-sub">AI-Powered</span>
             </div>
-            <button class="sidebar-close-btn" onclick="toggleSidebar()" aria-label="Close menu">âœ•</button>
+            <button class="sidebar-close-btn" onclick="toggleSidebar()" aria-label="Close menu">✕</button>
         </div>
 
         <nav class="sidebar-nav">
@@ -117,7 +118,12 @@ ASSETS = {
 
         <div class="sidebar-footer">
             <div class="sidebar-footer-card">
-                <div class="footer-icon">ðŸŽ“</div>
+                <div class="footer-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+                        <path d="M6 12v5c3 3 9 3 12 0v-5"/>
+                    </svg>
+                </div>
                 <div>
                     <div class="footer-title">MCA Mini Project</div>
                     <div class="footer-sub">AI-Powered ATS System</div>
@@ -152,7 +158,7 @@ ASSETS = {
             {% for category, message in messages %}
             <div class="flash flash-{{ category }}">
                 <span>{{ message }}</span>
-                <button onclick="this.parentElement.remove()" class="flash-close">âœ•</button>
+                <button onclick="this.parentElement.remove()" class="flash-close">✕</button>
             </div>
             {% endfor %}
         </div>
@@ -170,7 +176,7 @@ ASSETS = {
 </body>
 </html>
 """,
-    'static/js/tracker.js': r"""// â”€â”€ Job Tracker JavaScript â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    'static/js/tracker.js': r"""// ── Job Tracker JavaScript ────────────────────────────────────────────────────
 
 function filterTable() {
     const search = document.getElementById('filterSearch').value.toLowerCase();
@@ -222,7 +228,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 """,
-    'static/js/main.js': r"""// â”€â”€ Mobile Responsive Sidebar Toggle â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    'static/js/main.js': r"""// ── Mobile Responsive Sidebar Toggle ─────────────────────────────────────────
 function toggleSidebar(forceState) {
     const sidebar = document.getElementById('sidebar');
     const overlay = document.getElementById('sidebarOverlay');
@@ -295,7 +301,7 @@ function animateCount(el, start, end, duration) {
     requestAnimationFrame(update);
 }
 
-// â”€â”€ Interactive Purple Ripple Effect on Buttons â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Interactive Purple Ripple Effect on Buttons ───────────────────────────────
 document.addEventListener('click', (e) => {
     const btn = e.target.closest('.btn-primary, .btn-outline, .btn-ghost');
     if (!btn) return;
@@ -330,7 +336,7 @@ document.addEventListener('click', (e) => {
     setTimeout(() => ripple.remove(), 600);
 });
 
-// â”€â”€ Responsive Loading State for Form Submissions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Responsive Loading State for Form Submissions ────────────────────────────
 document.addEventListener('submit', (e) => {
     const btn = e.target.querySelector('button[type="submit"]');
     if (btn) {
@@ -368,11 +374,11 @@ document.addEventListener('submit', (e) => {
 {% block content %}
 <div class="resume-view-header">
     <div class="resume-view-actions">
-        <a href="{{ url_for('edit_resume', resume_id=resume.id) }}" class="btn btn-outline">âœï¸ Edit</a>
-        <a href="{{ url_for('ats_analyzer') }}" class="btn btn-outline">ðŸŽ¯ Analyze ATS</a>
-        <a href="{{ url_for('templates_page') }}" class="btn btn-primary">ðŸ“„ Download PDF</a>
+        <a href="{{ url_for('edit_resume', resume_id=resume.id) }}" class="btn btn-outline">✏️ Edit</a>
+        <a href="{{ url_for('ats_analyzer') }}" class="btn btn-outline">🎯 Analyze ATS</a>
+        <a href="{{ url_for('templates_page') }}" class="btn btn-primary">📄 Download PDF</a>
         <form method="POST" action="{{ url_for('delete_resume', resume_id=resume.id) }}" style="display:inline" onsubmit="return confirm('Delete this resume?')">
-            <button class="btn btn-danger">ðŸ—‘ï¸ Delete</button>
+            <button class="btn btn-danger">🗑️ Delete</button>
         </form>
     </div>
 </div>
@@ -385,11 +391,11 @@ document.addEventListener('submit', (e) => {
         <div class="rp-header-info">
             <h1 class="rp-name">{{ resume.full_name or 'Name' }}</h1>
             <div class="rp-contacts">
-                {% if resume.email %}<span>âœ‰ï¸ {{ resume.email }}</span>{% endif %}
-                {% if resume.phone %}<span>ðŸ“ž {{ resume.phone }}</span>{% endif %}
-                {% if resume.location %}<span>ðŸ“ {{ resume.location }}</span>{% endif %}
-                {% if resume.linkedin %}<a href="{{ resume.linkedin }}" target="_blank">ðŸ”— LinkedIn</a>{% endif %}
-                {% if resume.portfolio %}<a href="{{ resume.portfolio }}" target="_blank">ðŸ’» Portfolio</a>{% endif %}
+                {% if resume.email %}<span>✉️ {{ resume.email }}</span>{% endif %}
+                {% if resume.phone %}<span>📞 {{ resume.phone }}</span>{% endif %}
+                {% if resume.location %}<span>📍 {{ resume.location }}</span>{% endif %}
+                {% if resume.linkedin %}<a href="{{ resume.linkedin }}" target="_blank">🔗 LinkedIn</a>{% endif %}
+                {% if resume.portfolio %}<a href="{{ resume.portfolio }}" target="_blank">💻 Portfolio</a>{% endif %}
             </div>
         </div>
     </div>
@@ -421,11 +427,11 @@ document.addEventListener('submit', (e) => {
         <div class="rp-exp-item">
             <div class="rp-exp-header">
                 <div class="rp-exp-role">{{ exp.role }}</div>
-                <div class="rp-exp-meta">{{ exp.company }}{% if exp.duration %} Â· {{ exp.duration }}{% endif %}</div>
+                <div class="rp-exp-meta">{{ exp.company }}{% if exp.duration %} · {{ exp.duration }}{% endif %}</div>
             </div>
             {% if exp.description %}
             <div class="rp-exp-desc">
-                {% for line in exp.description.split('\n') %}{% if line.strip() %}<div class="rp-bullet">{{ line.strip().lstrip('â€¢-').strip() }}</div>{% endif %}{% endfor %}
+                {% for line in exp.description.split('\n') %}{% if line.strip() %}<div class="rp-bullet">{{ line.strip().lstrip('•-').strip() }}</div>{% endif %}{% endfor %}
             </div>
             {% endif %}
         </div>
@@ -439,7 +445,7 @@ document.addEventListener('submit', (e) => {
         {% for edu in resume.education %}
         <div class="rp-edu-item">
             <div class="rp-edu-degree">{{ edu.degree }}</div>
-            <div class="rp-edu-meta">{{ edu.institution }}{% if edu.year %} Â· {{ edu.year }}{% endif %}{% if edu.grade %} Â· {{ edu.grade }}{% endif %}</div>
+            <div class="rp-edu-meta">{{ edu.institution }}{% if edu.year %} · {{ edu.year }}{% endif %}{% if edu.grade %} · {{ edu.grade }}{% endif %}</div>
         </div>
         {% endfor %}
     </div>
@@ -456,7 +462,7 @@ document.addEventListener('submit', (e) => {
             </div>
             {% if proj.description %}
             <div class="rp-exp-desc">
-                {% for line in proj.description.split('\n') %}{% if line.strip() %}<div class="rp-bullet">{{ line.strip().lstrip('â€¢-').strip() }}</div>{% endif %}{% endfor %}
+                {% for line in proj.description.split('\n') %}{% if line.strip() %}<div class="rp-bullet">{{ line.strip().lstrip('•-').strip() }}</div>{% endif %}{% endfor %}
             </div>
             {% endif %}
         </div>
@@ -469,7 +475,7 @@ document.addEventListener('submit', (e) => {
         <div class="rp-section-title">Certifications</div>
         {% for cert in resume.certifications.split('\n') %}
             {% if cert.strip() %}
-            <div class="rp-bullet">ðŸ† {{ cert.strip().lstrip('â€¢-').strip() }}</div>
+            <div class="rp-bullet">🏆 {{ cert.strip().lstrip('•-').strip() }}</div>
             {% endif %}
         {% endfor %}
     </div>
@@ -478,11 +484,11 @@ document.addEventListener('submit', (e) => {
 {% endblock %}
 """,
     'static/css/style.css': r"""/* ============================================================
-   ATS RESUME BUILDER â€” ALL-PURPLE CYBERPUNK GLASS THEME
+   ATS RESUME BUILDER — ALL-PURPLE CYBERPUNK GLASS THEME
    Universal Device Optimization: Mobile, Tablet, Laptop, 4K
    ============================================================ */
 
-/* â”€â”€ Global Custom Properties: Exclusive Purple Palette â”€â”€ */
+/* ── Global Custom Properties: Exclusive Purple Palette ── */
 :root {
     /* Cosmic Purple Background Tones */
     --bg-darkest:    #060012;
@@ -544,7 +550,7 @@ document.addEventListener('submit', (e) => {
     --ease-smooth: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* â”€â”€ Reset & Cross-Device Base â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── Reset & Cross-Device Base ───────────────────────────── */
 *, *::before, *::after {
     box-sizing: border-box;
     margin: 0;
@@ -579,7 +585,7 @@ button, input, textarea, select {
     font-family: inherit;
 }
 
-/* â”€â”€ Dynamic Ambient Animated Purple Nebulae â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── Dynamic Ambient Animated Purple Nebulae ─────────────── */
 @keyframes cosmicPurpleShift {
     0%   { background-position: 0% 50%; }
     50%  { background-position: 100% 50%; }
@@ -633,7 +639,7 @@ body::after {
     will-change: transform;
 }
 
-/* â”€â”€ Custom Purple Scrollbars â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── Custom Purple Scrollbars ────────────────────────────── */
 ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
@@ -977,7 +983,7 @@ body::after {
     width: 100%;
 }
 
-/* â”€â”€ Flash Notifications â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── Flash Notifications ─────────────────────────────────── */
 .flash-container {
     padding: 16px 28px 0;
     display: flex;
@@ -1746,7 +1752,7 @@ body::after {
 }
 
 .tips-list li::before {
-    content: 'â†’';
+    content: '→';
     position: absolute;
     left: 0;
     color: var(--purple-neon);
@@ -2049,7 +2055,7 @@ body::after {
     box-shadow: 0 0 10px var(--purple-bright);
 }
 .template-check::after {
-    content: 'âœ“';
+    content: '✓';
     color: #ffffff;
     font-size: 12px;
     font-weight: 800;
@@ -2112,7 +2118,7 @@ body::after {
     position: relative;
 }
 .download-tips li::before {
-    content: 'â†’';
+    content: '→';
     position: absolute;
     left: 0;
     color: var(--purple-neon);
@@ -2482,7 +2488,7 @@ body::after {
     border: 1px solid var(--border-subtle);
 }
 
-/* â”€â”€ Modal Popup â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── Modal Popup ─────────────────────────────────────────── */
 .modal-overlay {
     display: none;
     position: fixed;
@@ -2654,7 +2660,7 @@ body::after {
 .rp-exp-meta { font-size: 13px; color: var(--text-secondary); margin-top: 2px; }
 .rp-exp-desc { display: flex; flex-direction: column; gap: 4px; margin-top: 6px; }
 .rp-bullet   { font-size: 13px; color: var(--text-secondary); padding-left: 14px; position: relative; }
-.rp-bullet::before { content: 'â†’'; position: absolute; left: 0; color: var(--purple-bright); }
+.rp-bullet::before { content: '→'; position: absolute; left: 0; color: var(--purple-bright); }
 .rp-edu-item   { margin-bottom: 10px; }
 .rp-edu-degree { font-size: 14px; font-weight: 700; color: var(--text-primary); }
 .rp-edu-meta   { font-size: 13px; color: var(--text-secondary); }
@@ -2741,7 +2747,7 @@ body::after {
    RESPONSIVE OPTIMIZATION ACROSS ALL DEVICES
    ============================================================ */
 
-/* â”€â”€ 1. Large Monitors & 4K Displays (â‰¥ 1441px) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── 1. Large Monitors & 4K Displays (≥ 1441px) ──────────── */
 @media (min-width: 1441px) {
     .page-content {
         padding: 36px 40px;
@@ -2754,7 +2760,7 @@ body::after {
     }
 }
 
-/* â”€â”€ 2. Medium Laptops & Desktops (1025px - 1440px) â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── 2. Medium Laptops & Desktops (1025px - 1440px) ───────── */
 @media (max-width: 1440px) and (min-width: 1025px) {
     .dashboard-hero {
         padding: 36px;
@@ -2764,7 +2770,7 @@ body::after {
     }
 }
 
-/* â”€â”€ 3. Tablets & Small Laptops (769px - 1024px) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── 3. Tablets & Small Laptops (769px - 1024px) ──────────── */
 @media (max-width: 1024px) {
     :root {
         --sidebar-w: 240px;
@@ -2801,7 +2807,7 @@ body::after {
     }
 }
 
-/* â”€â”€ 4. Mobile Devices & Small Tablets (â‰¤ 768px) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── 4. Mobile Devices & Small Tablets (≤ 768px) ──────────── */
 @media (max-width: 768px) {
     :root {
         --topbar-h: 56px;
@@ -2977,7 +2983,7 @@ body::after {
     }
 }
 
-/* â”€â”€ 5. Small Handheld Phones (â‰¤ 420px) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── 5. Small Handheld Phones (≤ 420px) ────────────────────── */
 @media (max-width: 420px) {
     .topbar-chip {
         display: none;
@@ -3017,7 +3023,7 @@ body::after {
     }
 }
 
-/* â”€â”€ Touch Optimization for Touchscreens â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── Touch Optimization for Touchscreens ──────────────────── */
 @media (hover: none) and (pointer: coarse) {
     .nav-item {
         min-height: 48px;
@@ -3042,7 +3048,7 @@ body::after {
     }
 }
 
-/* â”€â”€ Print Styles â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── Print Styles ─────────────────────────────────────────── */
 @media print {
     .sidebar, .topbar, .flash-container, .form-actions,
     .btn, .ats-actions, .interview-actions, .menu-btn {
@@ -3068,7 +3074,13 @@ body::after {
 <div class="upload-layout">
     <div class="form-card" style="max-width: 640px; margin: 0 auto;">
         <div class="form-card-header">
-            <div class="form-card-icon">ðŸ“¤</div>
+            <div class="form-card-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="17 8 12 3 7 8"/>
+                    <line x1="12" y1="3" x2="12" y2="15"/>
+                </svg>
+            </div>
             <div>
                 <h2 class="form-card-title">Upload Your Resume</h2>
                 <p class="form-card-sub">Extract text from PDF or DOCX files</p>
@@ -3077,9 +3089,16 @@ body::after {
 
         <form method="POST" enctype="multipart/form-data">
             <div class="upload-dropzone" id="dropzone" onclick="document.getElementById('resume_file').click()">
-                <div class="dropzone-icon">ðŸ“„</div>
+                <div class="dropzone-icon">
+                    <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14 2 14 8 20 8"/>
+                        <line x1="12" y1="18" x2="12" y2="12"/>
+                        <polyline points="9 15 12 12 15 15"/>
+                    </svg>
+                </div>
                 <div class="dropzone-text">Click to upload or drag &amp; drop</div>
-                <div class="dropzone-sub">PDF or DOCX â€” max 10 MB</div>
+                <div class="dropzone-sub">PDF or DOCX - max 10 MB</div>
                 <input type="file" id="resume_file" name="resume_file" accept=".pdf,.docx" style="display:none" onchange="showFilename(this)">
                 <div class="dropzone-filename" id="dropzoneFilename"></div>
             </div>
@@ -3091,7 +3110,7 @@ body::after {
 
         {% if extracted_text %}
         <div class="upload-result">
-            <h3 style="color: var(--green); margin-bottom: 12px;">âœ… Text Extracted Successfully</h3>
+            <h3 style="color: var(--purple-neon); margin-bottom: 12px;">Text Extracted Successfully</h3>
             <div class="upload-text-box">{{ extracted_text }}</div>
             <p style="color: var(--text-muted); font-size: 13px; margin-top: 12px;">
                 Copy this text and paste it into the ATS Analyzer or use it to fill the Resume Builder.
@@ -3115,7 +3134,7 @@ body::after {
 function showFilename(input) {
     const el = document.getElementById('dropzoneFilename');
     if (input.files.length > 0) {
-        el.textContent = 'ðŸ“Ž ' + input.files[0].name;
+        el.textContent = '📎 ' + input.files[0].name;
         el.style.display = 'block';
     }
 }
@@ -3146,9 +3165,9 @@ dropzone.addEventListener('drop', e => {
 {% block content %}
 <div class="dashboard-hero">
     <div class="hero-content">
-        <div class="hero-badge">ðŸ¤– AI-Powered</div>
+        <div class="hero-badge">🤖 AI-Powered</div>
         <h1 class="hero-title">Build Resumes That Beat the ATS</h1>
-        <p class="hero-subtitle">Create tailored resumes, analyze your job match score, identify skill gaps, and prepare for interviews â€” all in one place.</p>
+        <p class="hero-subtitle">Create tailored resumes, analyze your job match score, identify skill gaps, and prepare for interviews — all in one place.</p>
         <div class="hero-actions">
             <a href="{{ url_for('resume_builder') }}" class="btn btn-primary btn-lg">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -3245,40 +3264,75 @@ dropzone.addEventListener('drop', e => {
 
 <div class="feature-grid">
     <a href="{{ url_for('resume_builder') }}" class="feature-card feature-card-1">
-        <div class="feature-icon">ðŸ“</div>
+        <div class="feature-icon">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+                <line x1="16" y1="13" x2="8" y2="13"/>
+                <line x1="16" y1="17" x2="8" y2="17"/>
+                <polyline points="10 9 9 9 8 9"/>
+            </svg>
+        </div>
         <h3>Resume Builder</h3>
         <p>Create structured resumes with education, experience, skills, and projects. Save and manage multiple resumes.</p>
-        <div class="feature-arrow">â†’</div>
+        <div class="feature-arrow">&rarr;</div>
     </a>
     <a href="{{ url_for('ats_analyzer') }}" class="feature-card feature-card-2">
-        <div class="feature-icon">ðŸŽ¯</div>
+        <div class="feature-icon">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/>
+                <circle cx="12" cy="12" r="6"/>
+                <circle cx="12" cy="12" r="2"/>
+            </svg>
+        </div>
         <h3>ATS Match Analyzer</h3>
         <p>Paste a job description and instantly see your match score, matched skills, and missing skills.</p>
-        <div class="feature-arrow">â†’</div>
+        <div class="feature-arrow">&rarr;</div>
     </a>
     <a href="{{ url_for('ats_analyzer') }}" class="feature-card feature-card-3">
-        <div class="feature-icon">ðŸ”</div>
+        <div class="feature-icon">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"/>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                <line x1="11" y1="8" x2="11" y2="14"/>
+                <line x1="8" y1="11" x2="14" y2="11"/>
+            </svg>
+        </div>
         <h3>Skill Gap Analyzer</h3>
-        <p>Discover exactly which skills you're missing with curated learning resources for each gap.</p>
-        <div class="feature-arrow">â†’</div>
+        <p>Discover exactly which skills you are missing with curated learning resources for each gap.</p>
+        <div class="feature-arrow">&rarr;</div>
     </a>
     <a href="{{ url_for('templates_page') }}" class="feature-card feature-card-4">
-        <div class="feature-icon">ðŸŽ¨</div>
+        <div class="feature-icon">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                <path d="M3 9h18M9 21V9"/>
+            </svg>
+        </div>
         <h3>Resume Templates</h3>
         <p>Choose from Modern, Classic, or Minimal templates and download a professional PDF instantly.</p>
-        <div class="feature-arrow">â†’</div>
+        <div class="feature-arrow">&rarr;</div>
     </a>
     <a href="{{ url_for('interview_prep') }}" class="feature-card feature-card-5">
-        <div class="feature-icon">ðŸ’¬</div>
+        <div class="feature-icon">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
+        </div>
         <h3>Interview Prep</h3>
         <p>Generate HR, technical, and situational interview questions based on the job description.</p>
-        <div class="feature-arrow">â†’</div>
+        <div class="feature-arrow">&rarr;</div>
     </a>
     <a href="{{ url_for('tracker') }}" class="feature-card feature-card-6">
-        <div class="feature-icon">ðŸ“Š</div>
+        <div class="feature-icon">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 11l3 3L22 4"/>
+                <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+            </svg>
+        </div>
         <h3>Job Tracker</h3>
-        <p>Track every application â€” company, role, status, dates, and notes â€” in one organized place.</p>
-        <div class="feature-arrow">â†’</div>
+        <p>Track every application - company, role, status, dates, and notes in one organized place.</p>
+        <div class="feature-arrow">&rarr;</div>
     </a>
 </div>
 
@@ -3317,7 +3371,12 @@ dropzone.addEventListener('drop', e => {
 <!-- Personal Information -->
 <div class="form-card">
     <div class="form-card-header">
-        <div class="form-card-icon">ðŸ‘¤</div>
+        <div class="form-card-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+            </svg>
+        </div>
         <div>
             <h2 class="form-card-title">Personal Information</h2>
             <p class="form-card-sub">Your basic contact details</p>
@@ -3371,7 +3430,12 @@ dropzone.addEventListener('drop', e => {
 <!-- Education -->
 <div class="form-card">
     <div class="form-card-header">
-        <div class="form-card-icon">ðŸŽ“</div>
+        <div class="form-card-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+                <path d="M6 12v5c3 3 9 3 12 0v-5"/>
+            </svg>
+        </div>
         <div>
             <h2 class="form-card-title">Education</h2>
             <p class="form-card-sub">Academic qualifications</p>
@@ -3392,14 +3456,14 @@ dropzone.addEventListener('drop', e => {
                     </div>
                     <div class="form-group">
                         <label>Year</label>
-                        <input type="text" name="edu_year" class="form-input" placeholder="2022 â€“ 2024" value="{{ edu.year }}">
+                        <input type="text" name="edu_year" class="form-input" placeholder="2022 – 2024" value="{{ edu.year }}">
                     </div>
                     <div class="form-group">
                         <label>Grade / CGPA</label>
                         <input type="text" name="edu_grade" class="form-input" placeholder="8.5 CGPA" value="{{ edu.grade }}">
                     </div>
                 </div>
-                <button type="button" class="btn-remove" onclick="removeRow(this)">âœ• Remove</button>
+                <button type="button" class="btn-remove" onclick="removeRow(this)">✕ Remove</button>
             </div>
             {% endfor %}
         {% else %}
@@ -3415,14 +3479,14 @@ dropzone.addEventListener('drop', e => {
                 </div>
                 <div class="form-group">
                     <label>Year</label>
-                    <input type="text" name="edu_year" class="form-input" placeholder="2022 â€“ 2024">
+                    <input type="text" name="edu_year" class="form-input" placeholder="2022 – 2024">
                 </div>
                 <div class="form-group">
                     <label>Grade / CGPA</label>
                     <input type="text" name="edu_grade" class="form-input" placeholder="8.5 CGPA">
                 </div>
             </div>
-            <button type="button" class="btn-remove" onclick="removeRow(this)">âœ• Remove</button>
+            <button type="button" class="btn-remove" onclick="removeRow(this)">✕ Remove</button>
         </div>
         {% endif %}
     </div>
@@ -3432,7 +3496,12 @@ dropzone.addEventListener('drop', e => {
 <!-- Work Experience -->
 <div class="form-card">
     <div class="form-card-header">
-        <div class="form-card-icon">ðŸ’¼</div>
+        <div class="form-card-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
+                <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+            </svg>
+        </div>
         <div>
             <h2 class="form-card-title">Work Experience</h2>
             <p class="form-card-sub">Jobs, internships, and roles</p>
@@ -3453,15 +3522,15 @@ dropzone.addEventListener('drop', e => {
                     </div>
                     <div class="form-group">
                         <label>Duration</label>
-                        <input type="text" name="exp_duration" class="form-input" placeholder="Jun 2023 â€“ Present" value="{{ exp.duration }}">
+                        <input type="text" name="exp_duration" class="form-input" placeholder="Jun 2023 – Present" value="{{ exp.duration }}">
                     </div>
                 </div>
                 <div class="form-group">
                     <label>Responsibilities &amp; Achievements</label>
                     <textarea name="exp_description" class="form-textarea" rows="3"
-                        placeholder="â€¢ Designed and executed manual test cases for web applications&#10;â€¢ Automated regression tests using Selenium and Java&#10;â€¢ Reduced bug escape rate by 30%">{{ exp.description }}</textarea>
+                        placeholder="• Designed and executed manual test cases for web applications&#10;• Automated regression tests using Selenium and Java&#10;• Reduced bug escape rate by 30%">{{ exp.description }}</textarea>
                 </div>
-                <button type="button" class="btn-remove" onclick="removeRow(this)">âœ• Remove</button>
+                <button type="button" class="btn-remove" onclick="removeRow(this)">✕ Remove</button>
             </div>
             {% endfor %}
         {% else %}
@@ -3477,15 +3546,15 @@ dropzone.addEventListener('drop', e => {
                 </div>
                 <div class="form-group">
                     <label>Duration</label>
-                    <input type="text" name="exp_duration" class="form-input" placeholder="Jun 2023 â€“ Present">
+                    <input type="text" name="exp_duration" class="form-input" placeholder="Jun 2023 – Present">
                 </div>
             </div>
             <div class="form-group">
                 <label>Responsibilities &amp; Achievements</label>
                 <textarea name="exp_description" class="form-textarea" rows="3"
-                    placeholder="â€¢ Describe your responsibilities and achievements (one per line)..."></textarea>
+                    placeholder="• Describe your responsibilities and achievements (one per line)..."></textarea>
             </div>
-            <button type="button" class="btn-remove" onclick="removeRow(this)">âœ• Remove</button>
+            <button type="button" class="btn-remove" onclick="removeRow(this)">✕ Remove</button>
         </div>
         {% endif %}
     </div>
@@ -3495,10 +3564,14 @@ dropzone.addEventListener('drop', e => {
 <!-- Skills -->
 <div class="form-card">
     <div class="form-card-header">
-        <div class="form-card-icon">âš¡</div>
+        <div class="form-card-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+            </svg>
+        </div>
         <div>
             <h2 class="form-card-title">Skills</h2>
-            <p class="form-card-sub">Technical and soft skills â€” comma or newline separated</p>
+            <p class="form-card-sub">Technical and soft skills — comma or newline separated</p>
         </div>
     </div>
     <div class="form-group">
@@ -3511,7 +3584,14 @@ dropzone.addEventListener('drop', e => {
 <!-- Projects -->
 <div class="form-card">
     <div class="form-card-header">
-        <div class="form-card-icon">ðŸš€</div>
+        <div class="form-card-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/>
+                <path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/>
+                <path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/>
+                <path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/>
+            </svg>
+        </div>
         <div>
             <h2 class="form-card-title">Projects</h2>
             <p class="form-card-sub">Academic, personal, or professional projects</p>
@@ -3536,7 +3616,7 @@ dropzone.addEventListener('drop', e => {
                     <textarea name="proj_description" class="form-textarea" rows="2"
                         placeholder="Brief description of the project and your contribution...">{{ proj.description }}</textarea>
                 </div>
-                <button type="button" class="btn-remove" onclick="removeRow(this)">âœ• Remove</button>
+                <button type="button" class="btn-remove" onclick="removeRow(this)">✕ Remove</button>
             </div>
             {% endfor %}
         {% else %}
@@ -3556,7 +3636,7 @@ dropzone.addEventListener('drop', e => {
                 <textarea name="proj_description" class="form-textarea" rows="2"
                     placeholder="Brief description of the project and your contribution..."></textarea>
             </div>
-            <button type="button" class="btn-remove" onclick="removeRow(this)">âœ• Remove</button>
+            <button type="button" class="btn-remove" onclick="removeRow(this)">✕ Remove</button>
         </div>
         {% endif %}
     </div>
@@ -3566,7 +3646,12 @@ dropzone.addEventListener('drop', e => {
 <!-- Certifications -->
 <div class="form-card">
     <div class="form-card-header">
-        <div class="form-card-icon">ðŸ†</div>
+        <div class="form-card-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="8" r="7"/>
+                <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/>
+            </svg>
+        </div>
         <div>
             <h2 class="form-card-title">Certifications &amp; Achievements</h2>
             <p class="form-card-sub">One per line</p>
@@ -3574,7 +3659,7 @@ dropzone.addEventListener('drop', e => {
     </div>
     <div class="form-group">
         <textarea id="certifications" name="certifications" class="form-textarea" rows="4"
-            placeholder="AWS Certified Cloud Practitioner â€” 2024&#10;Selenium WebDriver with Java â€” Udemy&#10;Postman API Testing â€” Coursera">{{ resume.certifications if resume else '' }}</textarea>
+            placeholder="AWS Certified Cloud Practitioner — 2024&#10;Selenium WebDriver with Java — Udemy&#10;Postman API Testing — Coursera">{{ resume.certifications if resume else '' }}</textarea>
     </div>
 </div>
 
@@ -3607,7 +3692,11 @@ dropzone.addEventListener('drop', e => {
     <div class="interview-input">
         <div class="form-card">
             <div class="form-card-header">
-                <div class="form-card-icon">ðŸ’¬</div>
+                <div class="form-card-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                    </svg>
+                </div>
                 <div>
                     <h2 class="form-card-title">Generate Questions</h2>
                     <p class="form-card-sub">AI-powered from your job description</p>
@@ -3638,7 +3727,7 @@ dropzone.addEventListener('drop', e => {
 
             {% if not questions %}
             <div class="interview-tips-box">
-                <h4>ðŸ’¡ How to use this</h4>
+                <h4>Pro Tips:</h4>
                 <ol>
                     <li>Paste the job description</li>
                     <li>Get HR, technical &amp; situational questions</li>
@@ -3669,7 +3758,7 @@ dropzone.addEventListener('drop', e => {
         <!-- Technical Questions -->
         <div class="q-section">
             <h3 class="q-section-title">
-                <span class="q-section-icon">ðŸ› ï¸</span>
+                <span class="q-section-icon">🛠️</span>
                 Technical Questions
                 <span class="q-count">{{ questions.technical|length }}</span>
             </h3>
@@ -3679,10 +3768,10 @@ dropzone.addEventListener('drop', e => {
                     <div class="q-header">
                         <div class="q-skill-tag">{{ q.skill }}</div>
                         <div class="q-text">{{ q.question }}</div>
-                        <div class="q-toggle">â–¼</div>
+                        <div class="q-toggle">▼</div>
                     </div>
                     <div class="q-answer">
-                        <div class="q-answer-label">ðŸ’¡ Model Answer</div>
+                        <div class="q-answer-label">💡 Model Answer</div>
                         <p>{{ q.answer }}</p>
                     </div>
                 </div>
@@ -3693,7 +3782,7 @@ dropzone.addEventListener('drop', e => {
         <!-- HR Questions -->
         <div class="q-section">
             <h3 class="q-section-title">
-                <span class="q-section-icon">ðŸ‘”</span>
+                <span class="q-section-icon">👔</span>
                 HR & Behavioral Questions
                 <span class="q-count">{{ questions.hr|length }}</span>
             </h3>
@@ -3703,10 +3792,10 @@ dropzone.addEventListener('drop', e => {
                     <div class="q-header">
                         <div class="q-skill-tag">HR</div>
                         <div class="q-text">{{ q }}</div>
-                        <div class="q-toggle">â–¼</div>
+                        <div class="q-toggle">▼</div>
                     </div>
                     <div class="q-answer">
-                        <div class="q-answer-label">ðŸ’¡ How to Answer</div>
+                        <div class="q-answer-label">💡 How to Answer</div>
                         <p>{{ a }}</p>
                     </div>
                 </div>
@@ -3717,7 +3806,7 @@ dropzone.addEventListener('drop', e => {
         <!-- Situational Questions -->
         <div class="q-section">
             <h3 class="q-section-title">
-                <span class="q-section-icon">ðŸ§©</span>
+                <span class="q-section-icon">🧩</span>
                 Situational Questions
                 <span class="q-count">{{ questions.situational|length }}</span>
             </h3>
@@ -3727,10 +3816,10 @@ dropzone.addEventListener('drop', e => {
                     <div class="q-header">
                         <div class="q-skill-tag">Situational</div>
                         <div class="q-text">{{ q }}</div>
-                        <div class="q-toggle">â–¼</div>
+                        <div class="q-toggle">▼</div>
                     </div>
                     <div class="q-answer">
-                        <div class="q-answer-label">ðŸ’¡ How to Approach</div>
+                        <div class="q-answer-label">💡 How to Approach</div>
                         <p>{{ a }}</p>
                     </div>
                 </div>
@@ -3746,7 +3835,7 @@ dropzone.addEventListener('drop', e => {
         {% else %}
         <!-- Placeholder -->
         <div class="ats-placeholder">
-            <div class="placeholder-icon">ðŸ¤”</div>
+            <div class="placeholder-icon">🤔</div>
             <h3>Questions will appear here</h3>
             <p>Paste a job description and click <strong>Generate Questions</strong> to get personalized interview questions organized by category, with model answers to help you practice.</p>
         </div>
@@ -3760,20 +3849,20 @@ dropzone.addEventListener('drop', e => {
 function toggleAnswer(item) {
     item.classList.toggle('open');
     const toggle = item.querySelector('.q-toggle');
-    toggle.textContent = item.classList.contains('open') ? 'â–²' : 'â–¼';
+    toggle.textContent = item.classList.contains('open') ? '▲' : '▼';
 }
 
 function expandAll() {
     document.querySelectorAll('.q-item').forEach(item => {
         item.classList.add('open');
-        item.querySelector('.q-toggle').textContent = 'â–²';
+        item.querySelector('.q-toggle').textContent = '▲';
     });
 }
 
 function collapseAll() {
     document.querySelectorAll('.q-item').forEach(item => {
         item.classList.remove('open');
-        item.querySelector('.q-toggle').textContent = 'â–¼';
+        item.querySelector('.q-toggle').textContent = '▼';
     });
 }
 </script>
@@ -3862,7 +3951,14 @@ function collapseAll() {
     <div class="download-panel">
         <div class="form-card">
             <div class="form-card-header">
-                <div class="form-card-icon">ðŸ“„</div>
+                <div class="form-card-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14 2 14 8 20 8"/>
+                        <line x1="16" y1="13" x2="8" y2="13"/>
+                        <line x1="16" y1="17" x2="8" y2="17"/>
+                    </svg>
+                </div>
                 <div>
                     <h2 class="form-card-title">Generate PDF</h2>
                     <p class="form-card-sub">Select resume and template, then download</p>
@@ -3881,7 +3977,7 @@ function collapseAll() {
                         {% endfor %}
                     </select>
                     {% if not resume_list %}
-                    <div class="form-hint">No resumes saved yet. <a href="{{ url_for('resume_builder') }}">Create one first â†’</a></div>
+                    <div class="form-hint">No resumes saved yet. <a href="{{ url_for('resume_builder') }}">Create one first →</a></div>
                     {% endif %}
                 </div>
 
@@ -3900,7 +3996,7 @@ function collapseAll() {
             </form>
 
             <div class="download-tips">
-                <h4>ðŸ“Œ PDF Tips</h4>
+                <h4>📌 PDF Tips</h4>
                 <ul>
                     <li>Fill out your resume completely before downloading</li>
                     <li>Modern template is best for tech/IT roles</li>
@@ -3938,7 +4034,7 @@ selectTemplate('modern');
 </script>
 {% endblock %}
 """,
-    'static/js/resume_builder.js': r"""// â”€â”€ Resume Builder â€” Dynamic Form Functions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    'static/js/resume_builder.js': r"""// ── Resume Builder — Dynamic Form Functions ────────────────────────────────────
 
 function addEducation() {
     const list = document.getElementById('educationList');
@@ -3957,14 +4053,14 @@ function addEducation() {
             </div>
             <div class="form-group">
                 <label>Year</label>
-                <input type="text" name="edu_year" class="form-input" placeholder="2022 â€“ 2024">
+                <input type="text" name="edu_year" class="form-input" placeholder="2022 – 2024">
             </div>
             <div class="form-group">
                 <label>Grade / CGPA</label>
                 <input type="text" name="edu_grade" class="form-input" placeholder="8.5 CGPA">
             </div>
         </div>
-        <button type="button" class="btn-remove" onclick="removeRow(this)">âœ• Remove</button>
+        <button type="button" class="btn-remove" onclick="removeRow(this)">✕ Remove</button>
     `;
     list.appendChild(row);
     row.querySelector('input').focus();
@@ -3988,15 +4084,15 @@ function addExperience() {
             </div>
             <div class="form-group">
                 <label>Duration</label>
-                <input type="text" name="exp_duration" class="form-input" placeholder="Jun 2023 â€“ Present">
+                <input type="text" name="exp_duration" class="form-input" placeholder="Jun 2023 – Present">
             </div>
         </div>
         <div class="form-group">
             <label>Responsibilities & Achievements</label>
             <textarea name="exp_description" class="form-textarea" rows="3"
-                placeholder="â€¢ Describe your responsibilities and achievements (one per line)..."></textarea>
+                placeholder="• Describe your responsibilities and achievements (one per line)..."></textarea>
         </div>
-        <button type="button" class="btn-remove" onclick="removeRow(this)">âœ• Remove</button>
+        <button type="button" class="btn-remove" onclick="removeRow(this)">✕ Remove</button>
     `;
     list.appendChild(row);
     row.querySelector('input').focus();
@@ -4023,7 +4119,7 @@ function addProject() {
             <textarea name="proj_description" class="form-textarea" rows="2"
                 placeholder="Brief description of the project and your contribution..."></textarea>
         </div>
-        <button type="button" class="btn-remove" onclick="removeRow(this)">âœ• Remove</button>
+        <button type="button" class="btn-remove" onclick="removeRow(this)">✕ Remove</button>
     `;
     list.appendChild(row);
     row.querySelector('input').focus();
@@ -4037,7 +4133,7 @@ function removeRow(btn) {
     setTimeout(() => row.remove(), 200);
 }
 
-// â”€â”€ Form validation â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Form validation ───────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('resumeForm');
     if (!form) return;
@@ -4060,28 +4156,51 @@ document.addEventListener('DOMContentLoaded', () => {
 <!-- Stats Row -->
 <div class="stats-grid">
     <div class="stat-card">
-        <div class="stat-icon stat-icon-purple">ðŸ“¨</div>
+        <div class="stat-icon stat-icon-purple">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                <polyline points="22,6 12,13 2,6"/>
+            </svg>
+        </div>
         <div class="stat-info">
             <div class="stat-value">{{ stats.total }}</div>
             <div class="stat-label">Total Applied</div>
         </div>
     </div>
     <div class="stat-card">
-        <div class="stat-icon stat-icon-blue">ðŸ—“ï¸</div>
+        <div class="stat-icon stat-icon-blue">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                <line x1="16" y1="2" x2="16" y2="6"/>
+                <line x1="8" y1="2" x2="8" y2="6"/>
+                <line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
+        </div>
         <div class="stat-info">
             <div class="stat-value">{{ stats.by_status.get('Interview', 0) }}</div>
             <div class="stat-label">Interviews</div>
         </div>
     </div>
     <div class="stat-card">
-        <div class="stat-icon stat-icon-green">ðŸŽ‰</div>
+        <div class="stat-icon stat-icon-green">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                <polyline points="22 4 12 14.01 9 11.01"/>
+            </svg>
+        </div>
         <div class="stat-info">
             <div class="stat-value">{{ stats.by_status.get('Offer', 0) }}</div>
             <div class="stat-label">Offers</div>
         </div>
     </div>
     <div class="stat-card">
-        <div class="stat-icon stat-icon-red">âŒ</div>
+        <div class="stat-icon stat-icon-red">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="15" y1="9" x2="9" y2="15"/>
+                <line x1="9" y1="9" x2="15" y2="15"/>
+            </svg>
+        </div>
         <div class="stat-info">
             <div class="stat-value">{{ stats.by_status.get('Rejected', 0) }}</div>
             <div class="stat-label">Rejected</div>
@@ -4094,7 +4213,12 @@ document.addEventListener('DOMContentLoaded', () => {
     <div class="tracker-form-panel">
         <div class="form-card">
             <div class="form-card-header">
-                <div class="form-card-icon">âž•</div>
+                <div class="form-card-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="5" x2="12" y2="19"/>
+                        <line x1="5" y1="12" x2="19" y2="12"/>
+                    </svg>
+                </div>
                 <div>
                     <h2 class="form-card-title">Add Application</h2>
                     <p class="form-card-sub">Track a new job application</p>
@@ -4152,7 +4276,7 @@ document.addEventListener('DOMContentLoaded', () => {
     <div class="tracker-table-panel">
         <!-- Filters -->
         <div class="tracker-filters">
-            <input type="text" id="filterSearch" class="form-input" placeholder="ðŸ” Search company or role..." oninput="filterTable()">
+            <input type="text" id="filterSearch" class="form-input" placeholder="🔍 Search company or role..." oninput="filterTable()">
             <select id="filterStatus" class="form-select" onchange="filterTable()">
                 <option value="">All Statuses</option>
                 <option value="Applied">Applied</option>
@@ -4184,18 +4308,18 @@ document.addEventListener('DOMContentLoaded', () => {
                             <div class="company-avatar">{{ app.company[0].upper() }}</div>
                             <div>
                                 <div class="company-name">{{ app.company }}</div>
-                                {% if app.job_url %}<a href="{{ app.job_url }}" target="_blank" class="job-link">View Job â†—</a>{% endif %}
+                                {% if app.job_url %}<a href="{{ app.job_url }}" target="_blank" class="job-link">View Job ↗</a>{% endif %}
                             </div>
                         </td>
                         <td class="app-role">{{ app.role }}</td>
-                        <td>{{ app.date_applied or 'â€”' }}</td>
+                        <td>{{ app.date_applied or '—' }}</td>
                         <td>
                             <span class="status-badge status-{{ app.status|lower }}">
                                 {{ app.status }}
                             </span>
                         </td>
-                        <td>{{ app.location or 'â€”' }}</td>
-                        <td class="app-notes">{{ app.notes or 'â€”' }}</td>
+                        <td>{{ app.location or '—' }}</td>
+                        <td class="app-notes">{{ app.notes or '—' }}</td>
                         <td class="app-actions">
                             <button class="btn btn-sm btn-ghost" onclick="openEditModal({{ app.id }}, '{{ app.company }}', '{{ app.role }}', '{{ app.date_applied }}', '{{ app.status }}', '{{ app.location }}', '{{ app.salary }}', '{{ app.job_url }}', {{ ('`' + app.notes + '`') if app.notes else 'null' }})">Edit</button>
                             <form method="POST" action="{{ url_for('delete_application', app_id=app.id) }}" style="display:inline" onsubmit="return confirm('Delete this application?')">
@@ -4209,7 +4333,7 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
         {% else %}
         <div class="ats-placeholder">
-            <div class="placeholder-icon">ðŸ“‹</div>
+            <div class="placeholder-icon">📋</div>
             <h3>No Applications Yet</h3>
             <p>Add your first job application using the form on the left. Track every company you apply to and monitor your progress.</p>
         </div>
@@ -4222,7 +4346,7 @@ document.addEventListener('DOMContentLoaded', () => {
     <div class="modal">
         <div class="modal-header">
             <h3>Edit Application</h3>
-            <button onclick="closeEditModal()" class="modal-close">âœ•</button>
+            <button onclick="closeEditModal()" class="modal-close">✕</button>
         </div>
         <form method="POST" id="editForm">
             <div class="form-grid form-grid-2">
@@ -4288,7 +4412,13 @@ document.addEventListener('DOMContentLoaded', () => {
     <div class="ats-input-panel">
         <div class="form-card">
             <div class="form-card-header">
-                <div class="form-card-icon">ðŸŽ¯</div>
+                <div class="form-card-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"/>
+                        <circle cx="12" cy="12" r="6"/>
+                        <circle cx="12" cy="12" r="2"/>
+                    </svg>
+                </div>
                 <div>
                     <h2 class="form-card-title">Analyze Your Resume</h2>
                     <p class="form-card-sub">Compare your resume against a job description</p>
@@ -4345,7 +4475,12 @@ document.addEventListener('DOMContentLoaded', () => {
         {% if result %}
             {% if result.error %}
             <div class="alert alert-warning">
-                <span>âš ï¸</span> {{ result.error }}
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                    <line x1="12" y1="9" x2="12" y2="13"/>
+                    <line x1="12" y1="17" x2="12.01" y2="17"/>
+                </svg>
+                <span>{{ result.error }}</span>
             </div>
             {% else %}
             <!-- Score Card -->
@@ -4383,14 +4518,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
                 <div class="score-meta">
                     Matched <strong>{{ result.matched|length }}</strong> of <strong>{{ result.jd_skills|length }}</strong> skills
-                    &nbsp;Â·&nbsp; Keyword Density: <strong>{{ result.keyword_density }}%</strong>
+                    &nbsp;·&nbsp; Keyword Density: <strong>{{ result.keyword_density }}%</strong>
                 </div>
             </div>
 
             <!-- Tips -->
             {% if result.tips %}
             <div class="tips-card">
-                <h3 class="tips-title">ðŸ’¡ Improvement Tips</h3>
+                <h3 class="tips-title">💡 Improvement Tips</h3>
                 <ul class="tips-list">
                     {% for tip in result.tips %}
                     <li>{{ tip }}</li>
@@ -4402,7 +4537,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <!-- Matched Skills -->
             <div class="skills-section">
                 <h3 class="skills-section-title skills-matched-title">
-                    âœ… Matched Skills ({{ result.matched|length }})
+                    ✅ Matched Skills ({{ result.matched|length }})
                 </h3>
                 <div class="skills-cloud">
                     {% for skill, cat in result.matched.items() %}
@@ -4417,14 +4552,14 @@ document.addEventListener('DOMContentLoaded', () => {
             <!-- Missing Skills -->
             <div class="skills-section">
                 <h3 class="skills-section-title skills-missing-title">
-                    âŒ Missing Skills ({{ result.missing|length }})
+                    ❌ Missing Skills ({{ result.missing|length }})
                 </h3>
                 <div class="skills-cloud">
                     {% for skill, cat in result.missing.items() %}
                     <span class="skill-badge skill-missing" title="{{ cat.replace('_',' ').title() }}">{{ skill }}</span>
                     {% endfor %}
                     {% if not result.missing %}
-                    <span class="skills-empty">ðŸŽ‰ No skill gaps found!</span>
+                    <span class="skills-empty">🎉 No skill gaps found!</span>
                     {% endif %}
                 </div>
             </div>
@@ -4432,7 +4567,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <!-- Skill Gap Analysis with Resources -->
             {% if result.gap_analysis %}
             <div class="gap-card">
-                <h3 class="gap-title">ðŸ“š Skill Gap â€” Learning Resources</h3>
+                <h3 class="gap-title">📚 Skill Gap — Learning Resources</h3>
                 <div class="gap-list">
                     {% for gap in result.gap_analysis %}
                     <div class="gap-item">
@@ -4440,7 +4575,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             <span class="gap-skill">{{ gap.skill }}</span>
                             <span class="gap-category">{{ gap.category }}</span>
                         </div>
-                        <a href="{{ gap.resource }}" target="_blank" rel="noopener" class="btn btn-sm btn-outline">Learn â†’</a>
+                        <a href="{{ gap.resource }}" target="_blank" rel="noopener" class="btn btn-sm btn-outline">Learn →</a>
                     </div>
                     {% endfor %}
                 </div>
@@ -4450,17 +4585,17 @@ document.addEventListener('DOMContentLoaded', () => {
             <!-- Actions -->
             <div class="ats-actions">
                 <a href="{{ url_for('interview_prep') }}" class="btn btn-primary">
-                    ðŸ’¬ Generate Interview Questions
+                    💬 Generate Interview Questions
                 </a>
                 <a href="{{ url_for('templates_page') }}" class="btn btn-outline">
-                    ðŸŽ¨ Download Resume PDF
+                    🎨 Download Resume PDF
                 </a>
             </div>
             {% endif %}
         {% else %}
         <!-- Placeholder when no result -->
         <div class="ats-placeholder">
-            <div class="placeholder-icon">ðŸŽ¯</div>
+            <div class="placeholder-icon">🎯</div>
             <h3>Ready to Analyze</h3>
             <p>Paste your resume text and a job description, then click <strong>Analyze ATS Match</strong> to see your score, matched skills, missing skills, and personalized improvement tips.</p>
             <div class="placeholder-steps">
@@ -4501,8 +4636,7 @@ def extract_all():
     base_dir = os.path.abspath(os.path.dirname(__file__))
     for rel_path, content in ASSETS.items():
         full_path = os.path.join(base_dir, rel_path)
-        if not os.path.exists(full_path):
-            os.makedirs(os.path.dirname(full_path), exist_ok=True)
-            with open(full_path, 'w', encoding='utf-8') as f:
-                f.write(content)
+        os.makedirs(os.path.dirname(full_path), exist_ok=True)
+        with open(full_path, 'w', encoding='utf-8') as f:
+            f.write(content)
 
